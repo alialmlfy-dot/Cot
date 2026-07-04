@@ -1,0 +1,128 @@
+{
+  "db_path": "cot_cm.db",
+  "reports_dir": "reports",
+  "socrata": {
+    "domains": [
+      "publicdata.cftc.gov",
+      "publicreporting.cftc.gov"
+    ],
+    "dataset_name_must_contain": [
+      "disaggregated",
+      "futures only"
+    ],
+    "dataset_name_must_not_contain": [
+      "combined",
+      "supplemental",
+      "traders in financial"
+    ],
+    "app_token": null
+  },
+  "http": {
+    "timeout_s": 30,
+    "retries": 3,
+    "backoff_base_s": 2
+  },
+  "release_lag": {
+    "min_days": 3,
+    "release_weekday": 4
+  },
+  "prices": {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+    "sources": [
+      {
+        "name": "stooq",
+        "kind": "stooq_csv",
+        "endpoint": "https://stooq.com/q/d/l/",
+        "interval": "w",
+        "symbol_key": "stooq_symbol"
+      },
+      {
+        "name": "yahoo",
+        "kind": "yahoo_chart",
+        "endpoint": "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}",
+        "interval": "1wk",
+        "range": "25y",
+        "symbol_key": "yahoo_symbol"
+      }
+    ]
+  },
+  "universe": [
+    {
+      "root": "CL",
+      "label": "WTI Crude Oil",
+      "sector": "Energy",
+      "name_patterns": [
+        "CRUDE OIL, LIGHT SWEET",
+        "WTI-PHYSICAL",
+        "CRUDE OIL, LIGHT"
+      ],
+      "stooq_symbol": "cl.f",
+      "etf_mapping": "USO (options)",
+      "enabled": true,
+      "yahoo_symbol": "CL=F"
+    },
+    {
+      "root": "GC",
+      "label": "Gold",
+      "sector": "Metals",
+      "name_patterns": [
+        "GOLD - COMMODITY EXCHANGE"
+      ],
+      "stooq_symbol": "gc.f",
+      "etf_mapping": "GLD (options)",
+      "enabled": true,
+      "yahoo_symbol": "GC=F"
+    },
+    {
+      "root": "SI",
+      "label": "Silver",
+      "sector": "Metals",
+      "name_patterns": [
+        "SILVER - COMMODITY EXCHANGE"
+      ],
+      "stooq_symbol": "si.f",
+      "etf_mapping": "SLV (options)",
+      "enabled": true,
+      "yahoo_symbol": "SI=F"
+    },
+    {
+      "root": "HG",
+      "label": "Copper",
+      "sector": "Metals",
+      "name_patterns": [
+        "COPPER-GRADE #1",
+        "COPPER- GRADE #1",
+        "COPPER"
+      ],
+      "stooq_symbol": "hg.f",
+      "etf_mapping": "CPER / FCX as proxy",
+      "enabled": true,
+      "yahoo_symbol": "HG=F"
+    },
+    {
+      "root": "PL",
+      "label": "Platinum",
+      "sector": "Metals",
+      "name_patterns": [
+        "PLATINUM"
+      ],
+      "stooq_symbol": "pl.f",
+      "etf_mapping": "PPLT",
+      "enabled": true,
+      "yahoo_symbol": "PL=F"
+    },
+    {
+      "root": "PA",
+      "label": "Palladium (optional, disabled by default)",
+      "sector": "Metals",
+      "name_patterns": [
+        "PALLADIUM"
+      ],
+      "stooq_symbol": "pa.f",
+      "etf_mapping": "PALL",
+      "enabled": false,
+      "caveat": "Chronically thin; extreme concentration ratios; positioning dominated by a handful of traders. If enabled, this caveat must be logged in every report it appears in.",
+      "yahoo_symbol": "PA=F"
+    }
+  ]
+}

@@ -1,0 +1,339 @@
+{
+  "run_at": "2026-07-04T03:26:25Z",
+  "domain_errors": [
+    "publicdata.cftc.gov -> GET https://publicdata.cftc.gov/api/views/metadata/v1 failed after 4 attempts: HTTPSConnectionPool(host='publicdata.cftc.gov', port=443): Max retries exceeded with url: /api/views/metadata/v1?limit=1 (Caused by ProxyError('Unable to connect to proxy', OSError('Tunnel connection failed: 502 Bad Gateway')))"
+  ],
+  "domain": "publicreporting.cftc.gov",
+  "dataset": {
+    "id": "72hh-3qpy",
+    "name": "Disaggregated - Futures Only",
+    "data_updated_at": "2026-06-26T19:30:54+0000",
+    "row_access": true,
+    "rejected_candidates": [
+      {
+        "id": "ubmb-6exi",
+        "name": "Disaggregated - Futures Only",
+        "data_updated_at": "2022-07-28T19:12:21+0000",
+        "row_access": false
+      }
+    ]
+  },
+  "field_map": {
+    "report_date": "report_date_as_yyyy_mm_dd",
+    "cftc_code": "cftc_contract_market_code",
+    "market_name": "market_and_exchange_names",
+    "open_interest": "open_interest_all",
+    "prod_merc_long": "prod_merc_positions_long",
+    "prod_merc_short": "prod_merc_positions_short",
+    "swap_long": "swap_positions_long_all",
+    "swap_short": "swap__positions_short_all",
+    "swap_spread": "swap__positions_spread_all",
+    "mm_long": "m_money_positions_long_all",
+    "mm_short": "m_money_positions_short_all",
+    "mm_spread": "m_money_positions_spread",
+    "other_rept_long": "other_rept_positions_long",
+    "other_rept_short": "other_rept_positions_short",
+    "other_rept_spread": "other_rept_positions_spread",
+    "nonrept_long": "nonrept_positions_long_all",
+    "nonrept_short": "nonrept_positions_short_all",
+    "conc_gross_4_long": "conc_gross_le_4_tdr_long",
+    "conc_gross_4_short": "conc_gross_le_4_tdr_short",
+    "conc_gross_8_long": "conc_gross_le_8_tdr_long",
+    "conc_gross_8_short": "conc_gross_le_8_tdr_short",
+    "conc_net_4_long": "conc_net_le_4_tdr_long_all",
+    "conc_net_4_short": "conc_net_le_4_tdr_short_all",
+    "conc_net_8_long": "conc_net_le_8_tdr_long_all",
+    "conc_net_8_short": "conc_net_le_8_tdr_short_all",
+    "traders_total": "traders_tot_all"
+  },
+  "live_field_count": 194,
+  "contracts": [
+    {
+      "root": "CL",
+      "label": "WTI Crude Oil",
+      "enabled": true,
+      "candidates": [
+        {
+          "cftc_code": "067651",
+          "market_name": "WTI-PHYSICAL - NEW YORK MERCANTILE EXCHANGE",
+          "first_report_date": "2006-06-13",
+          "last_report_date": "2026-06-23",
+          "n_weeks": 1046,
+          "matched_pattern": "CRUDE OIL, LIGHT SWEET",
+          "latest_name_date": "2026-06-23"
+        },
+        {
+          "cftc_code": "067411",
+          "market_name": "CRUDE OIL, LIGHT SWEET-WTI - ICE FUTURES EUROPE",
+          "first_report_date": "2009-07-28",
+          "last_report_date": "2026-06-23",
+          "n_weeks": 883,
+          "matched_pattern": "CRUDE OIL, LIGHT SWEET",
+          "latest_name_date": "2026-06-23"
+        },
+        {
+          "cftc_code": "067655",
+          "market_name": "E-MINI CRUDE OIL, LIGHT SWEET - NEW YORK MERCANTILE EXCHANGE",
+          "first_report_date": "2006-06-13",
+          "last_report_date": "2007-01-16",
+          "n_weeks": 23,
+          "matched_pattern": "CRUDE OIL, LIGHT SWEET",
+          "latest_name_date": "2007-01-16"
+        }
+      ],
+      "selected": "067651"
+    },
+    {
+      "root": "GC",
+      "label": "Gold",
+      "enabled": true,
+      "candidates": [
+        {
+          "cftc_code": "088691",
+          "market_name": "GOLD - COMMODITY EXCHANGE INC.",
+          "first_report_date": "2006-06-13",
+          "last_report_date": "2026-06-23",
+          "n_weeks": 1046,
+          "matched_pattern": "GOLD - COMMODITY EXCHANGE",
+          "latest_name_date": "2026-06-23"
+        },
+        {
+          "cftc_code": "088695",
+          "market_name": "MICRO GOLD - COMMODITY EXCHANGE INC.",
+          "first_report_date": "2020-12-01",
+          "last_report_date": "2026-06-23",
+          "n_weeks": 151,
+          "matched_pattern": "GOLD - COMMODITY EXCHANGE",
+          "latest_name_date": "2026-06-23"
+        }
+      ],
+      "selected": "088691"
+    },
+    {
+      "root": "SI",
+      "label": "Silver",
+      "enabled": true,
+      "candidates": [
+        {
+          "cftc_code": "084691",
+          "market_name": "SILVER - COMMODITY EXCHANGE INC.",
+          "first_report_date": "2006-06-13",
+          "last_report_date": "2026-06-23",
+          "n_weeks": 1046,
+          "matched_pattern": "SILVER - COMMODITY EXCHANGE",
+          "latest_name_date": "2026-06-23"
+        },
+        {
+          "cftc_code": "084694",
+          "market_name": "MICRO SILVER - COMMODITY EXCHANGE INC.",
+          "first_report_date": "2026-01-13",
+          "last_report_date": "2026-05-26",
+          "n_weeks": 5,
+          "matched_pattern": "SILVER - COMMODITY EXCHANGE",
+          "latest_name_date": "2026-05-26"
+        }
+      ],
+      "selected": "084691"
+    },
+    {
+      "root": "HG",
+      "label": "Copper",
+      "enabled": true,
+      "candidates": [
+        {
+          "cftc_code": "085692",
+          "market_name": "COPPER- #1 - COMMODITY EXCHANGE INC.",
+          "first_report_date": "2006-06-13",
+          "last_report_date": "2026-06-23",
+          "n_weeks": 1046,
+          "matched_pattern": "COPPER-GRADE #1",
+          "latest_name_date": "2026-06-23"
+        },
+        {
+          "cftc_code": "085699",
+          "market_name": "MICRO COPPER - COMMODITY EXCHANGE INC.",
+          "first_report_date": "2026-01-27",
+          "last_report_date": "2026-05-12",
+          "n_weeks": 3,
+          "matched_pattern": "COPPER",
+          "latest_name_date": "2026-05-12"
+        }
+      ],
+      "selected": "085692"
+    },
+    {
+      "root": "PL",
+      "label": "Platinum",
+      "enabled": true,
+      "candidates": [
+        {
+          "cftc_code": "076651",
+          "market_name": "PLATINUM - NEW YORK MERCANTILE EXCHANGE",
+          "first_report_date": "2006-06-13",
+          "last_report_date": "2026-06-23",
+          "n_weeks": 1046,
+          "matched_pattern": "PLATINUM",
+          "latest_name_date": "2026-06-23"
+        }
+      ],
+      "selected": "076651"
+    },
+    {
+      "root": "PA",
+      "label": "Palladium (optional, disabled by default)",
+      "enabled": false,
+      "candidates": [
+        {
+          "cftc_code": "075651",
+          "market_name": "PALLADIUM - NEW YORK MERCANTILE EXCHANGE",
+          "first_report_date": "2006-06-13",
+          "last_report_date": "2026-06-23",
+          "n_weeks": 1046,
+          "matched_pattern": "PALLADIUM",
+          "latest_name_date": "2026-06-23"
+        }
+      ],
+      "selected": "075651"
+    }
+  ],
+  "prices": [
+    {
+      "source": "stooq",
+      "root": "CL",
+      "symbol": "cl.f",
+      "ok": false,
+      "rows": 0,
+      "first_date": null,
+      "last_date": null,
+      "last_close": null,
+      "error": "HTTP 200 / body starts: '<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"no'"
+    },
+    {
+      "source": "stooq",
+      "root": "GC",
+      "symbol": "gc.f",
+      "ok": false,
+      "rows": 0,
+      "first_date": null,
+      "last_date": null,
+      "last_close": null,
+      "error": "HTTP 200 / body starts: '<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"no'"
+    },
+    {
+      "source": "stooq",
+      "root": "SI",
+      "symbol": "si.f",
+      "ok": false,
+      "rows": 0,
+      "first_date": null,
+      "last_date": null,
+      "last_close": null,
+      "error": "HTTP 200 / body starts: '<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"no'"
+    },
+    {
+      "source": "stooq",
+      "root": "HG",
+      "symbol": "hg.f",
+      "ok": false,
+      "rows": 0,
+      "first_date": null,
+      "last_date": null,
+      "last_close": null,
+      "error": "HTTP 200 / body starts: '<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"no'"
+    },
+    {
+      "source": "stooq",
+      "root": "PL",
+      "symbol": "pl.f",
+      "ok": false,
+      "rows": 0,
+      "first_date": null,
+      "last_date": null,
+      "last_close": null,
+      "error": "HTTP 200 / body starts: '<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"no'"
+    },
+    {
+      "source": "stooq",
+      "root": "PA",
+      "symbol": "pa.f",
+      "ok": false,
+      "rows": 0,
+      "first_date": null,
+      "last_date": null,
+      "last_close": null,
+      "error": "HTTP 200 / body starts: '<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"no'"
+    },
+    {
+      "source": "yahoo",
+      "root": "CL",
+      "symbol": "CL=F",
+      "ok": true,
+      "rows": 1306,
+      "first_date": "2001-07-02",
+      "last_date": "2026-07-03",
+      "last_close": 68.78,
+      "error": null,
+      "granularity": "1wk"
+    },
+    {
+      "source": "yahoo",
+      "root": "GC",
+      "symbol": "GC=F",
+      "ok": true,
+      "rows": 1306,
+      "first_date": "2001-07-02",
+      "last_date": "2026-07-03",
+      "last_close": 4187.2998,
+      "error": null,
+      "granularity": "1wk"
+    },
+    {
+      "source": "yahoo",
+      "root": "SI",
+      "symbol": "SI=F",
+      "ok": true,
+      "rows": 1306,
+      "first_date": "2001-07-02",
+      "last_date": "2026-07-03",
+      "last_close": 62.815,
+      "error": null,
+      "granularity": "1wk"
+    },
+    {
+      "source": "yahoo",
+      "root": "HG",
+      "symbol": "HG=F",
+      "ok": true,
+      "rows": 1306,
+      "first_date": "2001-07-02",
+      "last_date": "2026-07-03",
+      "last_close": 6.224,
+      "error": null,
+      "granularity": "1wk"
+    },
+    {
+      "source": "yahoo",
+      "root": "PL",
+      "symbol": "PL=F",
+      "ok": true,
+      "rows": 1185,
+      "first_date": "2001-07-02",
+      "last_date": "2026-07-03",
+      "last_close": 1651.9,
+      "error": null,
+      "granularity": "1wk"
+    },
+    {
+      "source": "yahoo",
+      "root": "PA",
+      "symbol": "PA=F",
+      "ok": true,
+      "rows": 1233,
+      "first_date": "2001-07-02",
+      "last_date": "2026-07-03",
+      "last_close": 1272.5,
+      "error": null,
+      "granularity": "1wk"
+    }
+  ]
+}

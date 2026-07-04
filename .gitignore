@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+cot_cm.db
+cot_cm.db-wal
+cot_cm.db-shm
+.venv/
