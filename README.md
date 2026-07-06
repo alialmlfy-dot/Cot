@@ -18,8 +18,8 @@ places trades.
 | Phase | Scope | Status |
 |---|---|---|
 | 0 | Discovery & plumbing: skeleton, config, DB init, live Socrata verification, price source test, heartbeat | ✅ approved (6 contracts, Yahoo prices) |
-| 1 | Backfill 2006→present + weekly ingest + systemd + staleness guard | ✅ built — **⛔ awaiting operator approval** |
-| 2 | Features + measurement report + proposed cuts | not started |
+| 1 | Backfill 2006→present + weekly ingest + systemd + staleness guard | ✅ approved |
+| 2 | Features + measurement report + proposed cuts | ✅ built — **⛔ awaiting operator approval** |
 | 3 | Composite + weekly report (approved cuts only) | not started |
 | 4 | Backtest harness (IC report first, DSR-adjusted) | not started |
 
@@ -59,9 +59,13 @@ cotcm/
   cftc_ingest.py      # backfill + incremental Socrata pulls
   price_ingest.py     # Yahoo (primary) / stooq weekly close ingest
   coverage.py         # row counts + gap detection for deliverables
+  stats.py            # pure-python percentile/mean/stdev helpers (no numpy)
+  features.py         # §4 feature computation (keyed to release_date)
+  measurement.py      # distributions, dated extremes, proposed-cut helpers
 scripts/
   phase0_verify.py    # Phase 0 orchestrator → verification report
   phase1_backfill.py  # Phase 1 backfill → coverage/gap deliverable
+  phase2_features.py  # Phase 2 features → measurement report + proposed cuts
   weekly_ingest.py    # scheduled incremental job
   staleness_check.py  # scheduled silent-crash guard
 systemd/              # timer + service units (Sat ingest, Sun staleness)
