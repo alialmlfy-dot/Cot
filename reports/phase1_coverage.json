@@ -1,0 +1,116 @@
+{
+  "cot": [
+    {
+      "root": "CL",
+      "cftc_code": "067651",
+      "label": "WTI Crude Oil",
+      "enabled": true,
+      "rows": 1046,
+      "first": "2006-06-13",
+      "last": "2026-06-23",
+      "gaps": []
+    },
+    {
+      "root": "GC",
+      "cftc_code": "088691",
+      "label": "Gold",
+      "enabled": true,
+      "rows": 1046,
+      "first": "2006-06-13",
+      "last": "2026-06-23",
+      "gaps": []
+    },
+    {
+      "root": "HG",
+      "cftc_code": "085692",
+      "label": "Copper",
+      "enabled": true,
+      "rows": 1046,
+      "first": "2006-06-13",
+      "last": "2026-06-23",
+      "gaps": []
+    },
+    {
+      "root": "PA",
+      "cftc_code": "075651",
+      "label": "Palladium (optional, disabled by default)",
+      "enabled": false,
+      "rows": 0,
+      "first": null,
+      "last": null,
+      "gaps": []
+    },
+    {
+      "root": "PL",
+      "cftc_code": "076651",
+      "label": "Platinum",
+      "enabled": true,
+      "rows": 1046,
+      "first": "2006-06-13",
+      "last": "2026-06-23",
+      "gaps": []
+    },
+    {
+      "root": "SI",
+      "cftc_code": "084691",
+      "label": "Silver",
+      "enabled": true,
+      "rows": 1046,
+      "first": "2006-06-13",
+      "last": "2026-06-23",
+      "gaps": []
+    }
+  ],
+  "prices": [
+    {
+      "root": "CL",
+      "cftc_code": "067651",
+      "rows": 1306,
+      "first": "2001-07-06",
+      "last": "2026-07-10",
+      "sources": [
+        "yahoo"
+      ]
+    },
+    {
+      "root": "GC",
+      "cftc_code": "088691",
+      "rows": 1306,
+      "first": "2001-07-06",
+      "last": "2026-07-10",
+      "sources": [
+        "yahoo"
+      ]
+    },
+    {
+      "root": "HG",
+      "cftc_code": "085692",
+      "rows": 1306,
+      "first": "2001-07-06",
+      "last": "2026-07-10",
+      "sources": [
+        "yahoo"
+      ]
+    },
+    {
+      "root": "PL",
+      "cftc_code": "076651",
+      "rows": 1185,
+      "first": "2001-07-06",
+      "last": "2026-07-10",
+      "sources": [
+        "yahoo"
+      ]
+    },
+    {
+      "root": "SI",
+      "cftc_code": "084691",
+      "rows": 1306,
+      "first": "2001-07-06",
+      "last": "2026-07-10",
+      "sources": [
+        "yahoo"
+      ]
+    }
+  ]
+}

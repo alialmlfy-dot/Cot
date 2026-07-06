@@ -17,25 +17,28 @@ places trades.
 
 | Phase | Scope | Status |
 |---|---|---|
-| 0 | Discovery & plumbing: skeleton, config, DB init, live Socrata verification, price source test, heartbeat | ✅ built — **⛔ awaiting operator approval** |
-| 1 | Backfill 2006→present + weekly ingest + systemd + staleness guard | not started |
+| 0 | Discovery & plumbing: skeleton, config, DB init, live Socrata verification, price source test, heartbeat | ✅ approved (6 contracts, Yahoo prices) |
+| 1 | Backfill 2006→present + weekly ingest + systemd + staleness guard | ✅ built — **⛔ awaiting operator approval** |
 | 2 | Features + measurement report + proposed cuts | not started |
 | 3 | Composite + weekly report (approved cuts only) | not started |
 | 4 | Backtest harness (IC report first, DSR-adjusted) | not started |
 
-## Phase 0 usage
+## Usage
 
 ```bash
 pip install -r requirements.txt
+
+# Phase 0 — discovery & plumbing; writes contract_map (approved=0)
 python3 scripts/phase0_verify.py
-```
+# operator approves the picks:
+sqlite3 cot_cm.db "UPDATE contract_map SET approved=1;"
 
-Writes `cot_cm.db` (schema + `contract_map` rows with `approved=0`) and
-`reports/phase0_verification_report.md`. The operator reviews the contract
-map and price-source results, then approves by setting `approved=1`:
+# Phase 1 — one-time backfill + coverage/gap deliverable
+python3 scripts/phase1_backfill.py
 
-```sql
-UPDATE contract_map SET approved=1 WHERE cftc_code IN (...);
+# Scheduled jobs (installed via systemd/, see systemd/README.md)
+python3 scripts/weekly_ingest.py       # incremental COT + prices
+python3 scripts/staleness_check.py     # silent-crash guard
 ```
 
 ## Layout
@@ -51,8 +54,17 @@ cotcm/
   discovery.py        # live Socrata verification: dataset ID, field map,
                       #   contract name-matching (no invented constants)
   prices.py           # stooq weekly CSV source test
+  release_date.py     # report_date (Tue) -> release_date (Fri) — rule 3
+  integrity.py        # per-ingest checks: >=5 contracts, OI>0, legs <= OI
+  cftc_ingest.py      # backfill + incremental Socrata pulls
+  price_ingest.py     # Yahoo (primary) / stooq weekly close ingest
+  coverage.py         # row counts + gap detection for deliverables
 scripts/
   phase0_verify.py    # Phase 0 orchestrator → verification report
+  phase1_backfill.py  # Phase 1 backfill → coverage/gap deliverable
+  weekly_ingest.py    # scheduled incremental job
+  staleness_check.py  # scheduled silent-crash guard
+systemd/              # timer + service units (Sat ingest, Sun staleness)
 reports/              # generated verification/measurement reports
 ```
 

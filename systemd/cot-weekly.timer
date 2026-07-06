@@ -1,0 +1,14 @@
+[Unit]
+Description=COT Crude+Metals weekly ingest — Saturday 06:00 Asia/Riyadh
+# Runs after the Friday 15:30 ET CFTC Disaggregated release.
+
+[Timer]
+# Inline timezone requires systemd >= 252. On older Raspbian, drop the zone
+# here and set it system-wide: sudo timedatectl set-timezone Asia/Riyadh
+# (Riyadh has no DST, so 06:00 is stable year-round).
+OnCalendar=Sat *-*-* 06:00:00 Asia/Riyadh
+Persistent=true
+# If the Pi was asleep at the scheduled time, run on next boot.
+
+[Install]
+WantedBy=timers.target

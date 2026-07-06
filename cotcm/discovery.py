@@ -194,6 +194,17 @@ def find_contract_candidates(cfg, domain, dataset_id, fields, uni_entry):
     return candidates
 
 
+def resolve_source(cfg):
+    """Re-verify the live source at the start of every ingest run (operating
+    rule 2). Returns (domain, dataset_id, fields). Cheap enough for the weekly
+    job and robust to CFTC schema drift — nothing about the source is trusted
+    from a previous run."""
+    domain, _ = find_working_domain(cfg)
+    dataset = find_dataset(cfg, domain)
+    fields, _ = resolve_fields(cfg, domain, dataset["id"])
+    return domain, dataset["id"], fields
+
+
 def upsert_contract_map(conn, uni_entry, candidate):
     """Store the selected candidate with approved=0 (operator gate)."""
     conn.execute(

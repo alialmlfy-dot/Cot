@@ -1,0 +1,11 @@
+[Unit]
+Description=COT Crude+Metals staleness guard — Sunday 07:00 Asia/Riyadh
+# Separate timer from the ingest (spec section 7): if the weekly job dies
+# silently, this independent job still fires and alerts on stale data.
+
+[Timer]
+OnCalendar=Sun *-*-* 07:00:00 Asia/Riyadh
+Persistent=true
+
+[Install]
+WantedBy=timers.target

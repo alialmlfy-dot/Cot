@@ -1,0 +1,10 @@
+[Unit]
+Description=COT Crude+Metals staleness guard (silent-crash detector)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=pi
+WorkingDirectory=/home/pi/Cot
+ExecStart=/usr/bin/python3 /home/pi/Cot/scripts/staleness_check.py --max-age-days 12
+Nice=10

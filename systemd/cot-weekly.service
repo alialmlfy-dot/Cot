@@ -1,0 +1,13 @@
+[Unit]
+Description=COT Crude+Metals weekly incremental ingest
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Adjust User and paths to the Pi deployment.
+User=pi
+WorkingDirectory=/home/pi/Cot
+ExecStart=/usr/bin/python3 /home/pi/Cot/scripts/weekly_ingest.py
+# A failure already wrote an error heartbeat; surface it to the journal too.
+Nice=10
