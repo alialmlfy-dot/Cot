@@ -1,0 +1,148 @@
+{
+  "release_date": "2026-05-22",
+  "engine": "cot-cm v1.1 time-series composite",
+  "note": "Context, not entries. No sizing, no order routing.",
+  "transitions": [],
+  "contracts": [
+    {
+      "root": "CL",
+      "label": "WTI Crude Oil",
+      "sector": "Energy",
+      "cftc_code": "067651",
+      "etf_mapping": "USO (options)",
+      "caveat": null,
+      "composite": -0.114359,
+      "state": "NEUTRAL",
+      "prev_state": "NEUTRAL",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -1.0,
+        "g_comm": 1.0,
+        "h_mm": -0.0,
+        "k_flow": 0.2376,
+        "inputs": {
+          "hp_index": -0.13392385896080267,
+          "cot_idx_comm_3y": 100.0,
+          "cot_idx_mm_3y": 40.131660261201716,
+          "z_delta_mm": 0.9504314003150105,
+          "oi_flag": "short_covering",
+          "conc_pctile": 50.62439961575408
+        }
+      }
+    },
+    {
+      "root": "GC",
+      "label": "Gold",
+      "sector": "Metals",
+      "cftc_code": "088691",
+      "etf_mapping": "GLD (options)",
+      "caveat": null,
+      "composite": -0.105824,
+      "state": "NEUTRAL",
+      "prev_state": "NEUTRAL",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -0.8465,
+        "g_comm": 0.9758,
+        "h_mm": -0.0,
+        "k_flow": -0.0744,
+        "inputs": {
+          "hp_index": 0.09266117020251737,
+          "cot_idx_comm_3y": 99.51622656722435,
+          "cot_idx_mm_3y": 48.94587381405719,
+          "z_delta_mm": -0.29757018644205313,
+          "oi_flag": "mixed",
+          "conc_pctile": 69.64457252641691
+        }
+      }
+    },
+    {
+      "root": "HG",
+      "label": "Copper",
+      "sector": "Metals",
+      "cftc_code": "085692",
+      "etf_mapping": "CPER / FCX as proxy",
+      "caveat": null,
+      "composite": -0.170154,
+      "state": "NEUTRAL",
+      "prev_state": "NEUTRAL",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 1,
+      "components": {
+        "f_hp": 0.5909,
+        "g_comm": -0.86,
+        "h_mm": -0.9401,
+        "k_flow": -0.0232,
+        "inputs": {
+          "hp_index": 0.29798058982847275,
+          "cot_idx_comm_3y": 2.7992671009771986,
+          "cot_idx_mm_3y": 98.80298125423474,
+          "z_delta_mm": -0.0928097795991011,
+          "oi_flag": "mixed",
+          "conc_pctile": 87.03170028818444
+        }
+      }
+    },
+    {
+      "root": "PL",
+      "label": "Platinum",
+      "sector": "Metals",
+      "cftc_code": "076651",
+      "etf_mapping": "PPLT",
+      "caveat": null,
+      "composite": -0.264436,
+      "state": "LEAN_SHORT",
+      "prev_state": "LEAN_SHORT",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -1.0,
+        "g_comm": 0.6047,
+        "h_mm": -0.0,
+        "k_flow": -0.1041,
+        "inputs": {
+          "hp_index": 0.2073015793591819,
+          "cot_idx_comm_3y": 92.09451828685606,
+          "cot_idx_mm_3y": 68.00701061665222,
+          "z_delta_mm": -0.41646264810174416,
+          "oi_flag": "mixed",
+          "conc_pctile": 32.08453410182517
+        }
+      }
+    },
+    {
+      "root": "SI",
+      "label": "Silver",
+      "sector": "Metals",
+      "cftc_code": "084691",
+      "etf_mapping": "SLV (options)",
+      "caveat": null,
+      "composite": -0.365342,
+      "state": "LEAN_SHORT",
+      "prev_state": "LEAN_SHORT",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -0.9925,
+        "g_comm": 0.2276,
+        "h_mm": -0.0,
+        "k_flow": -0.1683,
+        "inputs": {
+          "hp_index": 0.16118706575548217,
+          "cot_idx_comm_3y": 84.55142081572346,
+          "cot_idx_mm_3y": 35.140496998512084,
+          "z_delta_mm": -0.6732526570790672,
+          "oi_flag": "long_liquidation",
+          "conc_pctile": 35.254562920268974
+        }
+      }
+    }
+  ]
+}

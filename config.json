@@ -124,5 +124,61 @@
       "caveat": "Chronically thin; extreme concentration ratios; positioning dominated by a handful of traders. If enabled, this caveat must be logged in every report it appears in.",
       "yahoo_symbol": "PA=F"
     }
-  ]
+  ],
+  "signal": {
+    "_approved": "Phase 2 gate, operator-approved 2026-07-07. Weights are global constants (one revision round permitted after Phase 4 backtest, then frozen).",
+    "weights": {
+      "hp": 0.4,
+      "comm": 0.25,
+      "mm": 0.2,
+      "flow": 0.15
+    },
+    "hp_anchors": {
+      "CL": {
+        "p10": -0.046499,
+        "p50": 0.036998,
+        "p90": 0.145563
+      },
+      "GC": {
+        "p10": 0.075018,
+        "p50": 0.18999,
+        "p90": 0.355681
+      },
+      "SI": {
+        "p10": 0.160459,
+        "p50": 0.257155,
+        "p90": 0.392166
+      },
+      "HG": {
+        "p10": 0.120335,
+        "p50": 0.210139,
+        "p90": 0.358793
+      },
+      "PL": {
+        "p10": 0.236539,
+        "p50": 0.365004,
+        "p90": 0.454354
+      }
+    },
+    "cot_band": {
+      "low": 20.0,
+      "high": 80.0
+    },
+    "flow": {
+      "z_saturation": 2.0,
+      "oi_gate": {
+        "new_longs": 1.0,
+        "new_shorts": 1.0,
+        "long_liquidation": 0.5,
+        "short_covering": 0.5,
+        "mixed": 0.5
+      }
+    },
+    "state_cuts": {
+      "strong": 0.5,
+      "lean": 0.2,
+      "_note": "provisional; confirmed vs measured composite distribution in Phase 3 dry-run"
+    },
+    "crowding_pctile": 90.0
+  }
 }

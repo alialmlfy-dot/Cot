@@ -1,0 +1,148 @@
+{
+  "release_date": "2026-06-26",
+  "engine": "cot-cm v1.1 time-series composite",
+  "note": "Context, not entries. No sizing, no order routing.",
+  "transitions": [],
+  "contracts": [
+    {
+      "root": "CL",
+      "label": "WTI Crude Oil",
+      "sector": "Energy",
+      "cftc_code": "067651",
+      "etf_mapping": "USO (options)",
+      "caveat": null,
+      "composite": -0.169109,
+      "state": "NEUTRAL",
+      "prev_state": "NEUTRAL",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -1.0,
+        "g_comm": 1.0,
+        "h_mm": -0.0,
+        "k_flow": -0.1274,
+        "inputs": {
+          "hp_index": -0.13921923929302718,
+          "cot_idx_comm_3y": 100.0,
+          "cot_idx_mm_3y": 35.61536605319381,
+          "z_delta_mm": -0.5095720946150654,
+          "oi_flag": "long_liquidation",
+          "conc_pctile": 43.977055449330784
+        }
+      }
+    },
+    {
+      "root": "GC",
+      "label": "Gold",
+      "sector": "Metals",
+      "cftc_code": "088691",
+      "etf_mapping": "GLD (options)",
+      "caveat": null,
+      "composite": -0.10338,
+      "state": "NEUTRAL",
+      "prev_state": "NEUTRAL",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -0.9007,
+        "g_comm": 1.0,
+        "h_mm": -0.0,
+        "k_flow": 0.046,
+        "inputs": {
+          "hp_index": 0.08643506058931266,
+          "cot_idx_comm_3y": 100.0,
+          "cot_idx_mm_3y": 57.83739361096194,
+          "z_delta_mm": 0.0919800806081408,
+          "oi_flag": "new_longs",
+          "conc_pctile": 81.16634799235182
+        }
+      }
+    },
+    {
+      "root": "HG",
+      "label": "Copper",
+      "sector": "Metals",
+      "cftc_code": "085692",
+      "etf_mapping": "CPER / FCX as proxy",
+      "caveat": null,
+      "composite": 0.109248,
+      "state": "NEUTRAL",
+      "prev_state": "NEUTRAL",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 1,
+      "components": {
+        "f_hp": 0.7335,
+        "g_comm": -0.2,
+        "h_mm": -0.6156,
+        "k_flow": -0.0735,
+        "inputs": {
+          "hp_index": 0.31917254313707577,
+          "cot_idx_comm_3y": 16.00022173768432,
+          "cot_idx_mm_3y": 92.31251305619385,
+          "z_delta_mm": -0.2938116619321962,
+          "oi_flag": "mixed",
+          "conc_pctile": 73.1357552581262
+        }
+      }
+    },
+    {
+      "root": "PL",
+      "label": "Platinum",
+      "sector": "Metals",
+      "cftc_code": "076651",
+      "etf_mapping": "PPLT",
+      "caveat": null,
+      "composite": -0.145771,
+      "state": "NEUTRAL",
+      "prev_state": "NEUTRAL",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -1.0,
+        "g_comm": 1.0,
+        "h_mm": -0.0,
+        "k_flow": 0.0282,
+        "inputs": {
+          "hp_index": 0.20505011936257858,
+          "cot_idx_comm_3y": 100.0,
+          "cot_idx_mm_3y": 58.584983581458125,
+          "z_delta_mm": 0.1127664242510723,
+          "oi_flag": "short_covering",
+          "conc_pctile": 38.718929254302104
+        }
+      }
+    },
+    {
+      "root": "SI",
+      "label": "Silver",
+      "sector": "Metals",
+      "cftc_code": "084691",
+      "etf_mapping": "SLV (options)",
+      "caveat": null,
+      "composite": -0.156937,
+      "state": "NEUTRAL",
+      "prev_state": "NEUTRAL",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -1.0,
+        "g_comm": 1.0,
+        "h_mm": -0.0,
+        "k_flow": -0.0462,
+        "inputs": {
+          "hp_index": 0.15708886183022988,
+          "cot_idx_comm_3y": 100.0,
+          "cot_idx_mm_3y": 35.4432111645089,
+          "z_delta_mm": -0.18497932647072454,
+          "oi_flag": "mixed",
+          "conc_pctile": 28.011472275334608
+        }
+      }
+    }
+  ]
+}

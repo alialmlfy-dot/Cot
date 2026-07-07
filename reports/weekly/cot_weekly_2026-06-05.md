@@ -1,0 +1,178 @@
+# COT Weekly Opportunity Report — release 2026-06-05
+
+*Time-series composite vs each contract's own history. Context for the analysis layer — never sizes or places trades.*
+
+## State transitions (the actionable events)
+
+- None this week.
+
+## Per-contract state
+
+| Root | State | Composite | f(hp) | g(comm) | h(mm) | k(flow) | Diverg.✓ | Crowding⚠ | ETF |
+|---|---|---|---|---|---|---|---|---|---|
+| CL | NEUTRAL | -0.183 | -1.00 | +0.81 | -0.00 | +0.10 | — | — | USO (options) |
+| GC | NEUTRAL | -0.109 | -0.86 | +0.80 | -0.00 | +0.24 | — | YES | GLD (options) |
+| HG | NEUTRAL | -0.151 | +0.66 | -1.00 | -1.00 | +0.25 | YES | — | CPER / FCX as proxy |
+| PL | LEAN_SHORT | -0.236 | -1.00 | +0.70 | -0.00 | -0.07 | — | — | PPLT |
+| SI | LEAN_SHORT | -0.285 | -1.00 | +0.45 | -0.00 | +0.02 | — | — | SLV (options) |
+
+## Divergence-aligned setups (highest-quality class)
+
+- **HG**: commercial and managed-money COT indices both at contrarian extremes, aligned bearish.
+
+## Crowding warnings (context only, never directional)
+
+- **GC**: net-4-trader concentration ≥ 90th percentile of own history (91).
+
+## Machine-readable block
+
+```json
+{
+  "release_date": "2026-06-05",
+  "engine": "cot-cm v1.1 time-series composite",
+  "note": "Context, not entries. No sizing, no order routing.",
+  "transitions": [],
+  "contracts": [
+    {
+      "root": "CL",
+      "label": "WTI Crude Oil",
+      "sector": "Energy",
+      "cftc_code": "067651",
+      "etf_mapping": "USO (options)",
+      "caveat": null,
+      "composite": -0.182574,
+      "state": "NEUTRAL",
+      "prev_state": "NEUTRAL",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -1.0,
+        "g_comm": 0.8092,
+        "h_mm": -0.0,
+        "k_flow": 0.1008,
+        "inputs": {
+          "hp_index": -0.13570100491453874,
+          "cot_idx_comm_3y": 96.18447765707005,
+          "cot_idx_mm_3y": 37.938107317532534,
+          "z_delta_mm": 0.40318932075623276,
+          "oi_flag": "mixed",
+          "conc_pctile": 41.61073825503356
+        }
+      }
+    },
+    {
+      "root": "GC",
+      "label": "Gold",
+      "sector": "Metals",
+      "cftc_code": "088691",
+      "etf_mapping": "GLD (options)",
+      "caveat": null,
+      "composite": -0.10871,
+      "state": "NEUTRAL",
+      "prev_state": "NEUTRAL",
+      "transition": false,
+      "crowding_flag": 1,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -0.864,
+        "g_comm": 0.8021,
+        "h_mm": -0.0,
+        "k_flow": 0.2423,
+        "inputs": {
+          "hp_index": 0.09065678005389555,
+          "cot_idx_comm_3y": 96.04298140883508,
+          "cot_idx_mm_3y": 56.52899152142427,
+          "z_delta_mm": 0.9691712805289454,
+          "oi_flag": "short_covering",
+          "conc_pctile": 90.9875359539789
+        }
+      }
+    },
+    {
+      "root": "HG",
+      "label": "Copper",
+      "sector": "Metals",
+      "cftc_code": "085692",
+      "etf_mapping": "CPER / FCX as proxy",
+      "caveat": null,
+      "composite": -0.150507,
+      "state": "NEUTRAL",
+      "prev_state": "NEUTRAL",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 1,
+      "components": {
+        "f_hp": 0.6568,
+        "g_comm": -1.0,
+        "h_mm": -1.0,
+        "k_flow": 0.2452,
+        "inputs": {
+          "hp_index": 0.30776953529991935,
+          "cot_idx_comm_3y": 0.0,
+          "cot_idx_mm_3y": 100.0,
+          "z_delta_mm": 0.49049952895019233,
+          "oi_flag": "new_longs",
+          "conc_pctile": 81.01629913710451
+        }
+      }
+    },
+    {
+      "root": "PL",
+      "label": "Platinum",
+      "sector": "Metals",
+      "cftc_code": "076651",
+      "etf_mapping": "PPLT",
+      "caveat": null,
+      "composite": -0.235602,
+      "state": "LEAN_SHORT",
+      "prev_state": "LEAN_SHORT",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -1.0,
+        "g_comm": 0.702,
+        "h_mm": -0.0,
+        "k_flow": -0.0741,
+        "inputs": {
+          "hp_index": 0.20654092801674098,
+          "cot_idx_comm_3y": 94.04048301624533,
+          "cot_idx_mm_3y": 64.95094582888454,
+          "z_delta_mm": -0.14810246505834793,
+          "oi_flag": "new_shorts",
+          "conc_pctile": 21.284755512943434
+        }
+      }
+    },
+    {
+      "root": "SI",
+      "label": "Silver",
+      "sector": "Metals",
+      "cftc_code": "084691",
+      "etf_mapping": "SLV (options)",
+      "caveat": null,
+      "composite": -0.284943,
+      "state": "LEAN_SHORT",
+      "prev_state": "LEAN_SHORT",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -1.0,
+        "g_comm": 0.4509,
+        "h_mm": -0.0,
+        "k_flow": 0.0155,
+        "inputs": {
+          "hp_index": 0.1602310818867181,
+          "cot_idx_comm_3y": 89.01831426313439,
+          "cot_idx_mm_3y": 33.225017530057634,
+          "z_delta_mm": 0.062094438529811335,
+          "oi_flag": "mixed",
+          "conc_pctile": 34.036433365292424
+        }
+      }
+    }
+  ]
+}
+```
