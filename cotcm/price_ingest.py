@@ -107,10 +107,17 @@ def ingest_prices(cfg, conn, order=("yahoo", "stooq")):
                     last_err = "%s: 0 bars" % name
                     continue
                 before = conn.total_changes
+                # Upsert, not INSERT OR IGNORE: the newest bar is the current
+                # partial week — its close must be refreshed by later runs
+                # (the Saturday run replaces it with the true Friday close).
+                # Still idempotent: one row per (cftc_code, week_end_date).
                 conn.executemany(
-                    "INSERT OR IGNORE INTO prices_weekly "
+                    "INSERT INTO prices_weekly "
                     "(cftc_code, week_end_date, close, source, ingested_at) "
-                    "VALUES (?, ?, ?, ?, ?)",
+                    "VALUES (?, ?, ?, ?, ?) "
+                    "ON CONFLICT(cftc_code, week_end_date) DO UPDATE SET "
+                    "close=excluded.close, source=excluded.source, "
+                    "ingested_at=excluded.ingested_at",
                     [(code, d, c, name, ts) for d, c in bars])
                 conn.commit()
                 w = conn.total_changes - before

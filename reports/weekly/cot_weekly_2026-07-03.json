@@ -1,0 +1,152 @@
+{
+  "release_date": "2026-07-03",
+  "engine": "cot-cm v1.1 time-series composite",
+  "note": "Context, not entries. No sizing, no order routing.",
+  "context_only_caveat": "Positioning context only: states describe positioning vs this contract's own history. In the 2015-2026 walk-forward backtest they carried no directional edge (signed t=-2.1, net SR -0.51, DSR 0.04). Do not read states as return forecasts.",
+  "transitions": [
+    "GC",
+    "HG"
+  ],
+  "contracts": [
+    {
+      "root": "CL",
+      "label": "WTI Crude Oil",
+      "sector": "Energy",
+      "cftc_code": "067651",
+      "etf_mapping": "USO (options)",
+      "caveat": null,
+      "composite": -0.177633,
+      "state": "NEUTRAL",
+      "prev_state": "NEUTRAL",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -1.0,
+        "g_comm": 0.8986,
+        "h_mm": -0.0,
+        "k_flow": -0.0152,
+        "inputs": {
+          "hp_index": -0.14045239037657867,
+          "cot_idx_comm_3y": 97.97181380672704,
+          "cot_idx_mm_3y": 35.14746302388954,
+          "z_delta_mm": -0.06081268712079566,
+          "oi_flag": "mixed",
+          "conc_pctile": 40.49665711556829
+        }
+      }
+    },
+    {
+      "root": "GC",
+      "label": "Gold",
+      "sector": "Metals",
+      "cftc_code": "088691",
+      "etf_mapping": "GLD (options)",
+      "caveat": null,
+      "composite": -0.224879,
+      "state": "LEAN_SHORT",
+      "prev_state": "NEUTRAL",
+      "transition": true,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -0.9119,
+        "g_comm": 0.4702,
+        "h_mm": -0.0,
+        "k_flow": 0.1488,
+        "inputs": {
+          "hp_index": 0.0851509317309523,
+          "cot_idx_comm_3y": 89.40337277862533,
+          "cot_idx_mm_3y": 59.747921040212205,
+          "z_delta_mm": 0.29767206654562955,
+          "oi_flag": "new_longs",
+          "conc_pctile": 81.18433619866285
+        }
+      }
+    },
+    {
+      "root": "HG",
+      "label": "Copper",
+      "sector": "Metals",
+      "cftc_code": "085692",
+      "etf_mapping": "CPER / FCX as proxy",
+      "caveat": null,
+      "composite": 0.206399,
+      "state": "LEAN_LONG",
+      "prev_state": "NEUTRAL",
+      "transition": true,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": 0.7528,
+        "g_comm": 0.0,
+        "h_mm": -0.3297,
+        "k_flow": -0.1918,
+        "inputs": {
+          "hp_index": 0.32203901821928643,
+          "cot_idx_comm_3y": 23.62060682212942,
+          "cot_idx_mm_3y": 86.59369124712764,
+          "z_delta_mm": -0.767095014914981,
+          "oi_flag": "long_liquidation",
+          "conc_pctile": 75.16714422158549
+        }
+      }
+    },
+    {
+      "root": "PL",
+      "label": "Platinum",
+      "sector": "Metals",
+      "cftc_code": "076651",
+      "etf_mapping": "PPLT",
+      "caveat": null,
+      "composite": -0.154835,
+      "state": "NEUTRAL",
+      "prev_state": "NEUTRAL",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -1.0,
+        "g_comm": 1.0,
+        "h_mm": -0.0,
+        "k_flow": -0.0322,
+        "inputs": {
+          "hp_index": 0.20341021611813379,
+          "cot_idx_comm_3y": 100.0,
+          "cot_idx_mm_3y": 57.05392937005177,
+          "z_delta_mm": -0.12892218186919677,
+          "oi_flag": "long_liquidation",
+          "conc_pctile": 60.840496657115565
+        }
+      }
+    },
+    {
+      "root": "SI",
+      "label": "Silver",
+      "sector": "Metals",
+      "cftc_code": "084691",
+      "etf_mapping": "SLV (options)",
+      "caveat": null,
+      "composite": -0.137839,
+      "state": "NEUTRAL",
+      "prev_state": "NEUTRAL",
+      "transition": false,
+      "crowding_flag": 0,
+      "divergence_aligned": 0,
+      "components": {
+        "f_hp": -1.0,
+        "g_comm": 1.0,
+        "h_mm": -0.0,
+        "k_flow": 0.0811,
+        "inputs": {
+          "hp_index": 0.15570953132255438,
+          "cot_idx_comm_3y": 100.0,
+          "cot_idx_mm_3y": 38.93383044586205,
+          "z_delta_mm": 0.32429439371618557,
+          "oi_flag": "mixed",
+          "conc_pctile": 41.83381088825215
+        }
+      }
+    }
+  ]
+}

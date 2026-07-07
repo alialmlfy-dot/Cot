@@ -42,7 +42,7 @@ def load_week(conn, release_date):
     return out
 
 
-def build_payload(conn, release_date):
+def build_payload(conn, release_date, caveat=None):
     meta = _contract_meta(conn)
     week = load_week(conn, release_date)
     contracts = []
@@ -63,6 +63,7 @@ def build_payload(conn, release_date):
         "release_date": release_date,
         "engine": "cot-cm v1.1 time-series composite",
         "note": "Context, not entries. No sizing, no order routing.",
+        "context_only_caveat": caveat,
         "transitions": [c["root"] for c in contracts if c["transition"]],
         "contracts": contracts,
     }
@@ -74,6 +75,10 @@ def render_markdown(payload):
     L.append("*Time-series composite vs each contract's own history. Context "
              "for the analysis layer — never sizes or places trades.*")
     L.append("")
+    if payload.get("context_only_caveat"):
+        L.append("> ⚠ **Standing caveat (Phase 4 go-live condition):** %s"
+                 % payload["context_only_caveat"])
+        L.append("")
     trans = [c for c in payload["contracts"] if c["transition"]]
     L.append("## State transitions (the actionable events)")
     L.append("")
@@ -130,7 +135,8 @@ def render_markdown(payload):
 def write_report(cfg, conn, release_date, out_dir=None):
     out_dir = out_dir or os.path.join(cfg["reports_dir"], "weekly")
     os.makedirs(out_dir, exist_ok=True)
-    payload = build_payload(conn, release_date)
+    payload = build_payload(conn, release_date,
+                            caveat=cfg["signal"].get("context_only_caveat"))
     md_path = os.path.join(out_dir, "cot_weekly_%s.md" % release_date)
     js_path = os.path.join(out_dir, "cot_weekly_%s.json" % release_date)
     with open(md_path, "w") as f:

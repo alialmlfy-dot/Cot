@@ -126,7 +126,8 @@
     }
   ],
   "signal": {
-    "_approved": "Phase 2 gate, operator-approved 2026-07-07. Weights are global constants (one revision round permitted after Phase 4 backtest, then frozen).",
+    "_approved": "Phase 2 gate, operator-approved 2026-07-07. FROZEN at Phase 4 go-live 2026-07-07: the single permitted weight-revision round was declined (re-fitting to the test set); weights are final for v1.1.",
+    "context_only_caveat": "Positioning context only: states describe positioning vs this contract's own history. In the 2015-2026 walk-forward backtest they carried no directional edge (signed t=-2.1, net SR -0.51, DSR 0.04). Do not read states as return forecasts.",
     "weights": {
       "hp": 0.4,
       "comm": 0.25,

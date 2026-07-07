@@ -21,7 +21,24 @@ places trades.
 | 1 | Backfill 2006→present + weekly ingest + systemd + staleness guard | ✅ approved |
 | 2 | Features + measurement report + proposed cuts | ✅ approved (global 20/80 band; per-contract hp anchors) |
 | 3 | Composite + weekly report (approved cuts only) | ✅ approved (STRONG 0.35 / LEAN 0.20) |
-| 4 | Backtest harness (IC report first, DSR-adjusted) | ✅ built — **⛔ awaiting go/no-go** (walk-forward result: no directional edge; see report) |
+| 4 | Backtest harness (IC report first, DSR-adjusted) | ✅ approved — **LIVE (context-only)** since 2026-07-07 |
+
+## Live operation (Phase 4 go-live decision)
+
+- **Context-only:** the 2015–2026 walk-forward backtest found no directional
+  edge in the states (signed t = −2.1, net SR −0.51, DSR 0.04). Every weekly
+  report carries a standing caveat; states describe positioning vs the
+  contract's own history and must not be read as return forecasts.
+- **Weights frozen:** the single permitted revision round was declined —
+  revising on the same test set that produced the negative result would be
+  curve-fitting. v1.1 weights are final.
+- **Saturday pipeline** (`scripts/weekly_ingest.py`): COT ingest → price
+  refresh → features → scores → weekly report (md + json in
+  `reports/weekly/`). Every step heartbeats; the Sunday staleness guard
+  watches for silent death.
+- **v1.2 research threads** (pre-registered, untested): PL is the only
+  contract with standalone contrarian COT IC; commercial-flow IC is
+  consistently positive while MM-flow IC is consistently negative.
 
 ## Usage
 
