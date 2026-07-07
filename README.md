@@ -20,8 +20,8 @@ places trades.
 | 0 | Discovery & plumbing: skeleton, config, DB init, live Socrata verification, price source test, heartbeat | ✅ approved (6 contracts, Yahoo prices) |
 | 1 | Backfill 2006→present + weekly ingest + systemd + staleness guard | ✅ approved |
 | 2 | Features + measurement report + proposed cuts | ✅ approved (global 20/80 band; per-contract hp anchors) |
-| 3 | Composite + weekly report (approved cuts only) | ✅ built — **⛔ awaiting operator approval** (state-cut decision pending) |
-| 4 | Backtest harness (IC report first, DSR-adjusted) | not started |
+| 3 | Composite + weekly report (approved cuts only) | ✅ approved (STRONG 0.35 / LEAN 0.20) |
+| 4 | Backtest harness (IC report first, DSR-adjusted) | ✅ built — **⛔ awaiting go/no-go** (walk-forward result: no directional edge; see report) |
 
 ## Usage
 
@@ -64,11 +64,13 @@ cotcm/
   measurement.py      # distributions, dated extremes, proposed-cut helpers
   scoring.py          # §5 composite with approved cuts (config "signal")
   weekly_report.py    # weekly md+json artifact (states, transitions, ETF map)
+  backtest.py         # §6 harness: IC, walk-forward, event studies, DSR
 scripts/
   phase0_verify.py    # Phase 0 orchestrator → verification report
   phase1_backfill.py  # Phase 1 backfill → coverage/gap deliverable
   phase2_features.py  # Phase 2 features → measurement report + proposed cuts
   phase3_score.py     # Phase 3 scoring → cut check + 12 dry-run weekly reports
+  phase4_backtest.py  # Phase 4 backtest → IC-first deliverable + DSR
   weekly_ingest.py    # scheduled incremental job
   staleness_check.py  # scheduled silent-crash guard
 systemd/              # timer + service units (Sat ingest, Sun staleness)

@@ -175,10 +175,17 @@
       }
     },
     "state_cuts": {
-      "strong": 0.5,
+      "strong": 0.35,
       "lean": 0.2,
-      "_note": "provisional; confirmed vs measured composite distribution in Phase 3 dry-run"
+      "_note": "approved at Phase 3 gate 2026-07-07: STRONG at the measured pooled outer deciles (p10/p90 = -0.354/+0.374), LEAN at the pooled quartiles. Supersedes the provisional 0.50. Configurations tried to date: 2 (0.50 provisional, 0.35 approved) - counted for DSR."
     },
     "crowding_pctile": 90.0
+  },
+  "backtest": {
+    "cost_bps_per_side": 5,
+    "horizons_weeks": [1, 2, 4],
+    "burn_in_end": "2014-12-31",
+    "walk_forward_step_years": 1,
+    "trials_count": 2
   }
 }

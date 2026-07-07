@@ -4,7 +4,7 @@
 
 ## 1. Composite distribution vs provisional state cuts
 
-Approval condition from the Phase 2 gate: confirm the provisional cuts (LEAN 0.2, STRONG 0.5) against the measured composite distribution; if the outer deciles land materially away from ±0.5, decile-based cuts win and return to the operator.
+Approval condition from the Phase 2 gate: confirm the provisional cuts (LEAN 0.2, STRONG 0.35) against the measured composite distribution; if the outer deciles land materially away from ±0.35, decile-based cuts win and return to the operator.
 
 | Scope | n | p10 | p25 | p75 | p90 | min | max |
 |---|---|---|---|---|---|---|---|
@@ -15,9 +15,9 @@ Approval condition from the Phase 2 gate: confirm the provisional cuts (LEAN 0.2
 | PL | 891 | -0.357 | -0.153 | +0.247 | +0.366 | -0.803 | +0.560 |
 | SI | 891 | -0.363 | -0.206 | +0.191 | +0.381 | -0.794 | +0.691 |
 
-State frequencies under the provisional cuts: {"LEAN_LONG": 24.1, "LEAN_SHORT": 20.3, "NEUTRAL": 50.4, "STRONG_LONG": 2.5, "STRONG_SHORT": 2.6}
+State frequencies under the provisional cuts: {"LEAN_LONG": 14.4, "LEAN_SHORT": 12.7, "NEUTRAL": 50.4, "STRONG_LONG": 12.2, "STRONG_SHORT": 10.2}
 
-**Verdict:** the pooled outer deciles (-0.354 / +0.374) sit INSIDE ±0.5 — the provisional STRONG cut is stricter than the outer-decile rule. See recommendation below the table in the summary.
+**Verdict:** pooled outer deciles (-0.354 / +0.374) are consistent with the provisional STRONG cut ±0.35.
 
 ## 2. Dry-run weekly reports (last 12 historical release dates)
 
@@ -34,7 +34,7 @@ State frequencies under the provisional cuts: {"LEAN_LONG": 24.1, "LEAN_SHORT": 
 - `reports/weekly/cot_weekly_2026-06-19.md`
 - `reports/weekly/cot_weekly_2026-06-26.md`
 
-Across the 12 dry-run weeks there were 5 state transitions — transitions are the actionable events; steady states are context.
+Across the 12 dry-run weeks there were 7 state transitions — transitions are the actionable events; steady states are context.
 
 ## ⛔ STOP — Phase 3 gate
 

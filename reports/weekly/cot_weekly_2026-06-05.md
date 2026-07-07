@@ -4,7 +4,7 @@
 
 ## State transitions (the actionable events)
 
-- None this week.
+- **SI**: STRONG_SHORT → **LEAN_SHORT** (composite -0.285)
 
 ## Per-contract state
 
@@ -14,7 +14,7 @@
 | GC | NEUTRAL | -0.109 | -0.86 | +0.80 | -0.00 | +0.24 | — | YES | GLD (options) |
 | HG | NEUTRAL | -0.151 | +0.66 | -1.00 | -1.00 | +0.25 | YES | — | CPER / FCX as proxy |
 | PL | LEAN_SHORT | -0.236 | -1.00 | +0.70 | -0.00 | -0.07 | — | — | PPLT |
-| SI | LEAN_SHORT | -0.285 | -1.00 | +0.45 | -0.00 | +0.02 | — | — | SLV (options) |
+| SI | LEAN_SHORT *(new)* | -0.285 | -1.00 | +0.45 | -0.00 | +0.02 | — | — | SLV (options) |
 
 ## Divergence-aligned setups (highest-quality class)
 
@@ -31,7 +31,9 @@
   "release_date": "2026-06-05",
   "engine": "cot-cm v1.1 time-series composite",
   "note": "Context, not entries. No sizing, no order routing.",
-  "transitions": [],
+  "transitions": [
+    "SI"
+  ],
   "contracts": [
     {
       "root": "CL",
@@ -154,8 +156,8 @@
       "caveat": null,
       "composite": -0.284943,
       "state": "LEAN_SHORT",
-      "prev_state": "LEAN_SHORT",
-      "transition": false,
+      "prev_state": "STRONG_SHORT",
+      "transition": true,
       "crowding_flag": 0,
       "divergence_aligned": 0,
       "components": {

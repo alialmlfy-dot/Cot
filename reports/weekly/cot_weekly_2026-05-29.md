@@ -14,7 +14,7 @@
 | GC | NEUTRAL | -0.119 | -0.85 | +0.85 | -0.00 | +0.06 | — | — | GLD (options) |
 | HG | NEUTRAL | -0.146 | +0.63 | -0.82 | -0.79 | -0.22 | YES | — | CPER / FCX as proxy |
 | PL | LEAN_SHORT | -0.250 | -1.00 | +0.61 | -0.00 | -0.02 | — | — | PPLT |
-| SI | LEAN_SHORT | -0.362 | -1.00 | +0.18 | -0.00 | -0.06 | — | — | SLV (options) |
+| SI | STRONG_SHORT | -0.362 | -1.00 | +0.18 | -0.00 | -0.06 | — | — | SLV (options) |
 
 ## Divergence-aligned setups (highest-quality class)
 
@@ -149,8 +149,8 @@
       "etf_mapping": "SLV (options)",
       "caveat": null,
       "composite": -0.361643,
-      "state": "LEAN_SHORT",
-      "prev_state": "LEAN_SHORT",
+      "state": "STRONG_SHORT",
+      "prev_state": "STRONG_SHORT",
       "transition": false,
       "crowding_flag": 0,
       "divergence_aligned": 0,

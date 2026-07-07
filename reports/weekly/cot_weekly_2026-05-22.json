@@ -2,7 +2,9 @@
   "release_date": "2026-05-22",
   "engine": "cot-cm v1.1 time-series composite",
   "note": "Context, not entries. No sizing, no order routing.",
-  "transitions": [],
+  "transitions": [
+    "SI"
+  ],
   "contracts": [
     {
       "root": "CL",
@@ -124,9 +126,9 @@
       "etf_mapping": "SLV (options)",
       "caveat": null,
       "composite": -0.365342,
-      "state": "LEAN_SHORT",
+      "state": "STRONG_SHORT",
       "prev_state": "LEAN_SHORT",
-      "transition": false,
+      "transition": true,
       "crowding_flag": 0,
       "divergence_aligned": 0,
       "components": {
