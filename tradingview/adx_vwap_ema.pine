@@ -119,18 +119,27 @@ lowerBand_3  = plot(lowerBandValue3, title = "Lower Band #3", color = color.teal
 // ─────────────────────────────────────────────
 EMA_GROUP  = "EMA Settings"
 showEma1   = input.bool(true,  title = "", group = EMA_GROUP, inline = "ema_1", display = display.none)
-emaLen1    = input.int(21, title = "Fast EMA Length", minval = 1, group = EMA_GROUP, inline = "ema_1", active = showEma1)
+emaLen1    = input.int(9,  title = "EMA #1 Length", minval = 1, group = EMA_GROUP, inline = "ema_1", active = showEma1)
 emaCol1    = input.color(color.teal, title = "", group = EMA_GROUP, inline = "ema_1")
 showEma2   = input.bool(true,  title = "", group = EMA_GROUP, inline = "ema_2", display = display.none)
-emaLen2    = input.int(50, title = "Slow EMA Length", minval = 1, group = EMA_GROUP, inline = "ema_2", active = showEma2)
-emaCol2    = input.color(color.purple, title = "", group = EMA_GROUP, inline = "ema_2")
+emaLen2    = input.int(21, title = "EMA #2 Length", minval = 1, group = EMA_GROUP, inline = "ema_2", active = showEma2)
+emaCol2    = input.color(color.orange, title = "", group = EMA_GROUP, inline = "ema_2")
+showEma3   = input.bool(true,  title = "", group = EMA_GROUP, inline = "ema_3", display = display.none)
+emaLen3    = input.int(50, title = "EMA #3 Length", minval = 1, group = EMA_GROUP, inline = "ema_3", active = showEma3)
+emaCol3    = input.color(color.purple, title = "", group = EMA_GROUP, inline = "ema_3")
 emaSrcInput = input.source(close, title = "EMA Source", group = EMA_GROUP, display = display.none)
+emaTfInput  = input.timeframe("", title = "EMA Timeframe", group = EMA_GROUP,
+     tooltip = "Timeframe the EMAs are calculated on. Empty = chart timeframe. On lower chart timeframes a higher EMA timeframe draws as steps.")
 
-emaFast = ta.ema(emaSrcInput, emaLen1)
-emaSlow = ta.ema(emaSrcInput, emaLen2)
+// One security call for all three EMAs. An empty timeframe string means the
+// chart's own timeframe, so no branching is needed.
+[ema1, ema2, ema3] = request.security(syminfo.tickerid, emaTfInput,
+     [ta.ema(emaSrcInput, emaLen1), ta.ema(emaSrcInput, emaLen2), ta.ema(emaSrcInput, emaLen3)],
+     barmerge.gaps_off, barmerge.lookahead_off)
 
-plot(showEma1 ? emaFast : na, title = "EMA Fast", color = emaCol1, linewidth = 2, force_overlay = true)
-plot(showEma2 ? emaSlow : na, title = "EMA Slow", color = emaCol2, linewidth = 2, force_overlay = true)
+plot(showEma1 ? ema1 : na, title = "EMA #1", color = emaCol1, linewidth = 2, force_overlay = true)
+plot(showEma2 ? ema2 : na, title = "EMA #2", color = emaCol2, linewidth = 2, force_overlay = true)
+plot(showEma3 ? ema3 : na, title = "EMA #3", color = emaCol3, linewidth = 2, force_overlay = true)
 
 // ─────────────────────────────────────────────
 //  Signals: EMA cross + ADX filter + VWAP side
@@ -144,9 +153,11 @@ requireVwap = input.bool(true, title = "Require Price on Correct Side of VWAP", 
 vwapBullOk = na(vwapValue) ? true : close > vwapValue
 vwapBearOk = na(vwapValue) ? true : close < vwapValue
 
+// EMA #1 (9) crossing EMA #2 (21) triggers the signal; EMA #3 (50) acts as
+// the trend filter — buys only when EMA #2 is above EMA #3, sells only below.
 trending   = ADX > th
-buySignal  = ta.crossover(emaFast, emaSlow)  and trending and DIPlus  > DIMinus and (not requireVwap or vwapBullOk)
-sellSignal = ta.crossunder(emaFast, emaSlow) and trending and DIMinus > DIPlus  and (not requireVwap or vwapBearOk)
+buySignal  = ta.crossover(ema1, ema2)  and ema2 > ema3 and trending and DIPlus  > DIMinus and (not requireVwap or vwapBullOk)
+sellSignal = ta.crossunder(ema1, ema2) and ema2 < ema3 and trending and DIMinus > DIPlus  and (not requireVwap or vwapBearOk)
 
 plotshape(showSignals and buySignal,  title = "Buy",  style = shape.triangleup,   location = location.belowbar,
      color = color.new(color.green, 0), size = size.small, force_overlay = true)
