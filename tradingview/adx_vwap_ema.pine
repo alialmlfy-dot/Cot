@@ -1,0 +1,76 @@
+//@version=6
+// ADX + VWAP + EMA — trend-strength + intraday value + directional bias in one overlay.
+//
+// How the three pieces fit together:
+//   - VWAP  : intraday "fair value" anchor. Price above VWAP = buyers in control today.
+//   - EMA   : directional bias. Fast/slow pair gives trend direction and cross signals.
+//   - ADX   : trend STRENGTH filter (not direction). Only take EMA/VWAP signals when
+//             ADX is above the threshold, so chop gets filtered out.
+//
+// ADX lives on a 0-100 scale, so it can't be drawn on the price chart. Instead its
+// state is shown as background shading + a value readout in the corner table.
+indicator("ADX + VWAP + EMA", overlay = true)
+
+// ── Inputs ──────────────────────────────────────────────────────────────────
+grpAdx  = "ADX"
+adxLen        = input.int(14,  "DI Length",        minval = 1, group = grpAdx)
+adxSmooth     = input.int(14,  "ADX Smoothing",    minval = 1, group = grpAdx)
+adxThreshold  = input.float(20, "Trend threshold", minval = 0, group = grpAdx,
+     tooltip = "Signals only fire while ADX is above this value.")
+
+grpVwap = "VWAP"
+showVwap  = input.bool(true, "Show VWAP", group = grpVwap)
+vwapSrc   = input.source(hlc3, "VWAP source", group = grpVwap)
+
+grpEma  = "EMA"
+showEmas  = input.bool(true, "Show EMAs", group = grpEma)
+emaFastLen = input.int(21, "Fast EMA length", minval = 1, group = grpEma)
+emaSlowLen = input.int(50, "Slow EMA length", minval = 1, group = grpEma)
+emaSrc     = input.source(close, "EMA source", group = grpEma)
+
+grpSig  = "Signals"
+showSignals = input.bool(true, "Show buy/sell markers", group = grpSig)
+requireVwap = input.bool(true, "Require price on correct side of VWAP", group = grpSig)
+
+// ── Calculations ────────────────────────────────────────────────────────────
+[diPlus, diMinus, adx] = ta.dmi(adxLen, adxSmooth)
+vwapValue = ta.vwap(vwapSrc)
+emaFast   = ta.ema(emaSrc, emaFastLen)
+emaSlow   = ta.ema(emaSrc, emaSlowLen)
+
+trending    = adx > adxThreshold
+bullBias    = diPlus > diMinus
+aboveVwap   = close > vwapValue
+belowVwap   = close < vwapValue
+
+// Entry logic: EMA cross in a strong trend, optionally confirmed by VWAP side.
+buySignal  = ta.crossover(emaFast, emaSlow)  and trending and bullBias  and (not requireVwap or aboveVwap)
+sellSignal = ta.crossunder(emaFast, emaSlow) and trending and not bullBias and (not requireVwap or belowVwap)
+
+// ── Plots ───────────────────────────────────────────────────────────────────
+plot(showVwap ? vwapValue : na, "VWAP", color = color.new(color.orange, 0), linewidth = 2)
+plot(showEmas ? emaFast : na, "EMA fast", color = color.new(color.teal, 0))
+plot(showEmas ? emaSlow : na, "EMA slow", color = color.new(color.purple, 0))
+
+// Background: green tint = strong up-trend, red tint = strong down-trend, none = chop.
+bgcolor(trending ? (bullBias ? color.new(color.green, 92) : color.new(color.red, 92)) : na,
+     title = "ADX trend shading")
+
+plotshape(showSignals and buySignal,  "Buy",  shape.triangleup,   location.belowbar,
+     color.new(color.green, 0), size = size.small)
+plotshape(showSignals and sellSignal, "Sell", shape.triangledown, location.abovebar,
+     color.new(color.red, 0), size = size.small)
+
+// ── ADX readout table (top-right) ───────────────────────────────────────────
+var table info = table.new(position.top_right, 2, 2, border_width = 1)
+if barstate.islast
+    stateTxt   = trending ? (bullBias ? "TRENDING ▲" : "TRENDING ▼") : "RANGING"
+    stateColor = trending ? (bullBias ? color.green : color.red) : color.gray
+    table.cell(info, 0, 0, "ADX",   text_color = color.white, bgcolor = color.new(color.black, 30))
+    table.cell(info, 1, 0, str.tostring(adx, "#.#"), text_color = color.white, bgcolor = color.new(color.black, 30))
+    table.cell(info, 0, 1, "State", text_color = color.white, bgcolor = color.new(color.black, 30))
+    table.cell(info, 1, 1, stateTxt, text_color = color.white, bgcolor = color.new(stateColor, 40))
+
+// ── Alerts ──────────────────────────────────────────────────────────────────
+alertcondition(buySignal,  "ADX+VWAP+EMA Buy",  "Fast EMA crossed above slow EMA with ADX confirming trend")
+alertcondition(sellSignal, "ADX+VWAP+EMA Sell", "Fast EMA crossed below slow EMA with ADX confirming trend")
