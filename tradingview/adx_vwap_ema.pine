@@ -1,76 +1,215 @@
 //@version=6
-// ADX + VWAP + EMA — trend-strength + intraday value + directional bias in one overlay.
-//
-// How the three pieces fit together:
-//   - VWAP  : intraday "fair value" anchor. Price above VWAP = buyers in control today.
-//   - EMA   : directional bias. Fast/slow pair gives trend direction and cross signals.
-//   - ADX   : trend STRENGTH filter (not direction). Only take EMA/VWAP signals when
-//             ADX is above the threshold, so chop gets filtered out.
-//
-// ADX lives on a 0-100 scale, so it can't be drawn on the price chart. Instead its
-// state is shown as background shading + a value readout in the corner table.
-indicator("ADX + VWAP + EMA", overlay = true)
+indicator("MY ADX + VWAP + EMA v4", overlay = false)
 
-// ── Inputs ──────────────────────────────────────────────────────────────────
-grpAdx  = "ADX"
-adxLen        = input.int(14,  "DI Length",        minval = 1, group = grpAdx)
-adxSmooth     = input.int(14,  "ADX Smoothing",    minval = 1, group = grpAdx)
-adxThreshold  = input.float(20, "Trend threshold", minval = 0, group = grpAdx,
-     tooltip = "Signals only fire while ADX is above this value.")
+// ─────────────────────────────────────────────
+//  ADX
+// ─────────────────────────────────────────────
+len = input.int(14, title = "Length", group = "ADX Settings")
+th  = input.int(25, title = "Threshold", group = "ADX Settings")
 
-grpVwap = "VWAP"
-showVwap  = input.bool(true, "Show VWAP", group = grpVwap)
-vwapSrc   = input.source(hlc3, "VWAP source", group = grpVwap)
+TrueRange                  = math.max(math.max(high - low, math.abs(high - nz(close[1]))), math.abs(low - nz(close[1])))
+DirectionalMovementPlus    = high - nz(high[1]) > nz(low[1]) - low ? math.max(high - nz(high[1]), 0) : 0
+DirectionalMovementMinus   = nz(low[1]) - low > high - nz(high[1]) ? math.max(nz(low[1]) - low, 0) : 0
 
-grpEma  = "EMA"
-showEmas  = input.bool(true, "Show EMAs", group = grpEma)
-emaFastLen = input.int(21, "Fast EMA length", minval = 1, group = grpEma)
-emaSlowLen = input.int(50, "Slow EMA length", minval = 1, group = grpEma)
-emaSrc     = input.source(close, "EMA source", group = grpEma)
+SmoothedTrueRange = 0.0
+SmoothedTrueRange := nz(SmoothedTrueRange[1]) - (nz(SmoothedTrueRange[1]) / len) + TrueRange
 
-grpSig  = "Signals"
-showSignals = input.bool(true, "Show buy/sell markers", group = grpSig)
-requireVwap = input.bool(true, "Require price on correct side of VWAP", group = grpSig)
+SmoothedDirectionalMovementPlus = 0.0
+SmoothedDirectionalMovementPlus := nz(SmoothedDirectionalMovementPlus[1]) - (nz(SmoothedDirectionalMovementPlus[1]) / len) + DirectionalMovementPlus
 
-// ── Calculations ────────────────────────────────────────────────────────────
-[diPlus, diMinus, adx] = ta.dmi(adxLen, adxSmooth)
-vwapValue = ta.vwap(vwapSrc)
-emaFast   = ta.ema(emaSrc, emaFastLen)
-emaSlow   = ta.ema(emaSrc, emaSlowLen)
+SmoothedDirectionalMovementMinus = 0.0
+SmoothedDirectionalMovementMinus := nz(SmoothedDirectionalMovementMinus[1]) - (nz(SmoothedDirectionalMovementMinus[1]) / len) + DirectionalMovementMinus
 
-trending    = adx > adxThreshold
-bullBias    = diPlus > diMinus
-aboveVwap   = close > vwapValue
-belowVwap   = close < vwapValue
+DIPlus  = SmoothedDirectionalMovementPlus  / SmoothedTrueRange * 100
+DIMinus = SmoothedDirectionalMovementMinus / SmoothedTrueRange * 100
+DX      = math.abs(DIPlus - DIMinus) / (DIPlus + DIMinus) * 100
+ADX     = ta.sma(DX, len)
 
-// Entry logic: EMA cross in a strong trend, optionally confirmed by VWAP side.
-buySignal  = ta.crossover(emaFast, emaSlow)  and trending and bullBias  and (not requireVwap or aboveVwap)
-sellSignal = ta.crossunder(emaFast, emaSlow) and trending and not bullBias and (not requireVwap or belowVwap)
+plotcandle(0, DIPlus,  0, DIPlus,  title = "DI+", color = color.new(color.green, 50), wickcolor = color.new(#ffffff, 100), bordercolor = color.new(#000000, 0), display = display.pane)
+plotcandle(0, DIMinus, 0, DIMinus, title = "DI-", color = color.new(color.red,   50), wickcolor = color.new(#ffffff, 100), bordercolor = color.new(#000000, 0), display = display.pane)
+plot(ADX, color = color.navy, title = "ADX")
+hline(th, color = color.rgb(255, 248, 148),linewidth = 1,linestyle = hline.style_solid)
+pZero = plot(0,  color = color.new(color.gray, 100), display = display.none,title = "مستوى الصفر")
+pTop  = plot(th, color = color.new(color.gray, 100), display = display.none,title = "حدد الانطلاق")
+fill(pZero, pTop, color = color.new(#000000, 45), title = "Trendy Level")
 
-// ── Plots ───────────────────────────────────────────────────────────────────
-plot(showVwap ? vwapValue : na, "VWAP", color = color.new(color.orange, 0), linewidth = 2)
-plot(showEmas ? emaFast : na, "EMA fast", color = color.new(color.teal, 0))
-plot(showEmas ? emaSlow : na, "EMA slow", color = color.new(color.purple, 0))
+// ─────────────────────────────────────────────
+//  VWAP  (force_overlay = true  → main chart)
+// ─────────────────────────────────────────────
+hideonDWM = input(false, title = "Hide VWAP on 1D or Above", group = "VWAP Settings", display = display.none)
+var anchor = input.string(defval = "Session", title = "Anchor Period",
+ options = ["Session", "Week", "Month", "Quarter", "Year", "Decade", "Century", "Earnings", "Dividends", "Splits"], group = "VWAP Settings")
+src    = input(title = "Source", defval = hlc3, group = "VWAP Settings", display = display.none)
+offset = input.int(0, title = "Offset",  group = "VWAP Settings", display = display.none)
 
-// Background: green tint = strong up-trend, red tint = strong down-trend, none = chop.
-bgcolor(trending ? (bullBias ? color.new(color.green, 92) : color.new(color.red, 92)) : na,
-     title = "ADX trend shading")
+BANDS_GROUP          = "Bands Settings"
+CALC_MODE_TOOLTIP    = "Determines the units used to calculate the distance of the bands. When 'Percentage' is selected, a multiplier of 1 means 1%."
+calcModeInput        = input.string("Standard Deviation", "Bands Calculation Mode", options = ["Standard Deviation", "Percentage"], group = BANDS_GROUP, tooltip = CALC_MODE_TOOLTIP, display = display.none)
+showBand_1           = input(true,  title = "", group = BANDS_GROUP, inline = "band_1", display = display.none)
+bandMult_1           = input.float(1.0, title = "Bands Multiplier #1", group = BANDS_GROUP, inline = "band_1", step = 0.5, minval = 0, display = display.none, active = showBand_1)
+showBand_2           = input(false, title = "", group = BANDS_GROUP, inline = "band_2", display = display.none)
+bandMult_2           = input.float(2.0, title = "Bands Multiplier #2", group = BANDS_GROUP, inline = "band_2", step = 0.5, minval = 0, display = display.none, active = showBand_2)
+showBand_3           = input(false, title = "", group = BANDS_GROUP, inline = "band_3", display = display.none)
+bandMult_3           = input.float(3.0, title = "Bands Multiplier #3", group = BANDS_GROUP, inline = "band_3", step = 0.5, minval = 0, display = display.none, active = showBand_3)
 
-plotshape(showSignals and buySignal,  "Buy",  shape.triangleup,   location.belowbar,
-     color.new(color.green, 0), size = size.small)
-plotshape(showSignals and sellSignal, "Sell", shape.triangledown, location.abovebar,
-     color.new(color.red, 0), size = size.small)
+cumVolume = ta.cum(volume)
+if barstate.islast and cumVolume == 0
+    runtime.error("No volume is provided by the data vendor.")
 
-// ── ADX readout table (top-right) ───────────────────────────────────────────
-var table info = table.new(position.top_right, 2, 2, border_width = 1)
+isNewPeriod = switch anchor
+    "Earnings"  =>
+        new_earnings_actual       = request.earnings(syminfo.tickerid, earnings.actual,       barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol = true)
+        new_earnings_standardized = request.earnings(syminfo.tickerid, earnings.standardized, barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol = true)
+        not na(new_earnings_actual) or not na(new_earnings_standardized)
+    "Dividends" =>
+        new_dividends = request.dividends(syminfo.tickerid, dividends.gross,        barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol = true)
+        not na(new_dividends)
+    "Splits"    =>
+        new_split     = request.splits(syminfo.tickerid,   splits.denominator,      barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol = true)
+        not na(new_split)
+    "Session"   => timeframe.change("D")
+    "Week"      => timeframe.change("W")
+    "Month"     => timeframe.change("M")
+    "Quarter"   => timeframe.change("3M")
+    "Year"      => timeframe.change("12M")
+    "Decade"    => timeframe.change("12M") and year % 10  == 0
+    "Century"   => timeframe.change("12M") and year % 100 == 0
+    => false
+
+isEsdAnchor = anchor == "Earnings" or anchor == "Dividends" or anchor == "Splits"
+if na(src[1]) and not isEsdAnchor
+    isNewPeriod := true
+
+float vwapValue       = na
+float upperBandValue1 = na
+float lowerBandValue1 = na
+float upperBandValue2 = na
+float lowerBandValue2 = na
+float upperBandValue3 = na
+float lowerBandValue3 = na
+
+if not (hideonDWM and timeframe.isdwm)
+    [_vwap, _stdevUpper, _] = ta.vwap(src, isNewPeriod, 1)
+    vwapValue      := _vwap
+    stdevAbs        = _stdevUpper - _vwap
+    bandBasis       = calcModeInput == "Standard Deviation" ? stdevAbs : _vwap * 0.01
+    upperBandValue1 := _vwap + bandBasis * bandMult_1
+    lowerBandValue1 := _vwap - bandBasis * bandMult_1
+    upperBandValue2 := _vwap + bandBasis * bandMult_2
+    lowerBandValue2 := _vwap - bandBasis * bandMult_2
+    upperBandValue3 := _vwap + bandBasis * bandMult_3
+    lowerBandValue3 := _vwap - bandBasis * bandMult_3
+
+plot(vwapValue, title = "VWAP", color = #2962FF, offset = offset, force_overlay = true)
+
+displayBand1 = showBand_1 ? display.pane : display.none
+upperBand_1  = plot(upperBandValue1, title = "Upper Band #1", color = color.green, offset = offset, display = displayBand1, editable = showBand_1, force_overlay = true)
+lowerBand_1  = plot(lowerBandValue1, title = "Lower Band #1", color = color.green, offset = offset, display = displayBand1, editable = showBand_1, force_overlay = true)
+
+displayBand2 = showBand_2 ? display.pane : display.none
+upperBand_2  = plot(upperBandValue2, title = "Upper Band #2", color = color.olive, offset = offset, display = displayBand2, editable = showBand_2, force_overlay = true)
+lowerBand_2  = plot(lowerBandValue2, title = "Lower Band #2", color = color.olive, offset = offset, display = displayBand2, editable = showBand_2, force_overlay = true)
+
+displayBand3 = showBand_3 ? display.pane : display.none
+upperBand_3  = plot(upperBandValue3, title = "Upper Band #3", color = color.teal, offset = offset, display = displayBand3, editable = showBand_3, force_overlay = true)
+lowerBand_3  = plot(lowerBandValue3, title = "Lower Band #3", color = color.teal, offset = offset, display = displayBand3, editable = showBand_3, force_overlay = true)
+
+// ─────────────────────────────────────────────
+//  EMA  (force_overlay = true  → main chart)
+// ─────────────────────────────────────────────
+EMA_GROUP  = "EMA Settings"
+showEma1   = input.bool(true,  title = "", group = EMA_GROUP, inline = "ema_1", display = display.none)
+emaLen1    = input.int(21, title = "Fast EMA Length", minval = 1, group = EMA_GROUP, inline = "ema_1", active = showEma1)
+emaCol1    = input.color(color.teal, title = "", group = EMA_GROUP, inline = "ema_1")
+showEma2   = input.bool(true,  title = "", group = EMA_GROUP, inline = "ema_2", display = display.none)
+emaLen2    = input.int(50, title = "Slow EMA Length", minval = 1, group = EMA_GROUP, inline = "ema_2", active = showEma2)
+emaCol2    = input.color(color.purple, title = "", group = EMA_GROUP, inline = "ema_2")
+emaSrcInput = input.source(close, title = "EMA Source", group = EMA_GROUP, display = display.none)
+
+emaFast = ta.ema(emaSrcInput, emaLen1)
+emaSlow = ta.ema(emaSrcInput, emaLen2)
+
+plot(showEma1 ? emaFast : na, title = "EMA Fast", color = emaCol1, linewidth = 2, force_overlay = true)
+plot(showEma2 ? emaSlow : na, title = "EMA Slow", color = emaCol2, linewidth = 2, force_overlay = true)
+
+// ─────────────────────────────────────────────
+//  Signals: EMA cross + ADX filter + VWAP side
+// ─────────────────────────────────────────────
+SIG_GROUP   = "Signal Settings"
+showSignals = input.bool(true, title = "Show Buy/Sell Markers", group = SIG_GROUP)
+requireVwap = input.bool(true, title = "Require Price on Correct Side of VWAP", group = SIG_GROUP,
+     tooltip = "Buy only if close > VWAP, sell only if close < VWAP. Ignored when VWAP is hidden.")
+
+// When VWAP is hidden (Hide on 1D or Above) its value is na → skip the VWAP condition.
+vwapBullOk = na(vwapValue) ? true : close > vwapValue
+vwapBearOk = na(vwapValue) ? true : close < vwapValue
+
+trending   = ADX > th
+buySignal  = ta.crossover(emaFast, emaSlow)  and trending and DIPlus  > DIMinus and (not requireVwap or vwapBullOk)
+sellSignal = ta.crossunder(emaFast, emaSlow) and trending and DIMinus > DIPlus  and (not requireVwap or vwapBearOk)
+
+plotshape(showSignals and buySignal,  title = "Buy",  style = shape.triangleup,   location = location.belowbar,
+     color = color.new(color.green, 0), size = size.small, force_overlay = true)
+plotshape(showSignals and sellSignal, title = "Sell", style = shape.triangledown, location = location.abovebar,
+     color = color.new(color.red, 0), size = size.small, force_overlay = true)
+
+alertcondition(buySignal,  title = "ADX+VWAP+EMA Buy",  message = "Fast EMA crossed above slow EMA with ADX > threshold")
+alertcondition(sellSignal, title = "ADX+VWAP+EMA Sell", message = "Fast EMA crossed below slow EMA with ADX > threshold")
+
+//______________________________________
+//          ATR
+//______________________________________
+length = input.int(14, 'Length', minval = 1)
+smoothing = input.string('RMA', 'Smoothing', options = ['RMA', 'SMA', 'EMA', 'WMA'])
+m = input.float(1.5, 'Multiplier')
+src1 = input.source(high, 'High Source')
+src2 = input.source(low, 'Low Source')
+
+srcbottom = open < close ? open : close
+srctop = close > open ? close : open
+
+pline = input.bool(true, 'Show Price Lines')
+col1 = input.color(color.blue, 'ATR Text Color')
+col2 = input.color(color.teal, 'Low Text Color', inline = '1')
+col3 = input.color(color.red, 'High Text Color', inline = '2')
+collong = input.color(color.teal, 'Low Line Color', inline = '1')
+colshort = input.color(color.red, 'High Line Color', inline = '2')
+
+colFillShort = input.color(color.new(color.red, 80), 'Short Fill (p1–p3)')
+colFillLong = input.color(color.new(color.teal, 80), 'Long Fill  (p2–p4)')
+
+ma_function(source, len) =>
+    if smoothing == 'RMA'
+        ta.rma(source, len)
+    else if smoothing == 'SMA'
+        ta.sma(source, len)
+    else if smoothing == 'EMA'
+        ta.ema(source, len)
+    else
+        ta.wma(source, len)
+
+atr = ma_function(ta.tr(true), length) * m
+x = atr + src1
+x2 = src2 - atr
+x3 = atr + srctop
+x4 = srcbottom - atr
+displaydowncloud = input.bool(defval = true,title = "عرض السحابه السفلية ")
+//p1 = plot(x, 'ATR Short SL (high)', color = colshort, trackprice = pline, style = plot.style_circles, linewidth = 1, force_overlay = true)
+//p3 = plot(x3, 'ATR Short SL (body)', color = colshort, trackprice = pline, style = plot.style_circles, linewidth = 1, force_overlay = true)
+//p2 = plot(x2, 'ATR Long SL (low)', color =  displaydowncloud ? collong : na, trackprice = pline, style = plot.style_circles, linewidth = 1, force_overlay = true)
+//p4 = plot(x4, 'ATR Long SL (body)', color =  displaydowncloud ? collong: na, trackprice = pline, style = plot.style_circles, linewidth = 1, force_overlay = true)
+
+//fill(p1, p3, color = colFillShort, title = 'Short Zone Fill (p1–p3)')
+//fill(p2, p4, color = displaydowncloud ? colFillLong : na, title = 'Long Zone Fill  (p2–p4)')
+
+var table tbl = table.new(position.bottom_center, 3, 1, border_width = 3,force_overlay = true)
+
+f_fillCell(_col, _row, _val, _label) =>
+    table.cell(tbl, _col, _row, _label + str.tostring(_val, '#.##'), text_color = col1)
+    table.cell_set_text_color(tbl, 1, 0, color.new(col3, 0))
+    table.cell_set_text_color(tbl, 2, 0, color.new(col2, 0))
+
 if barstate.islast
-    stateTxt   = trending ? (bullBias ? "TRENDING ▲" : "TRENDING ▼") : "RANGING"
-    stateColor = trending ? (bullBias ? color.green : color.red) : color.gray
-    table.cell(info, 0, 0, "ADX",   text_color = color.white, bgcolor = color.new(color.black, 30))
-    table.cell(info, 1, 0, str.tostring(adx, "#.#"), text_color = color.white, bgcolor = color.new(color.black, 30))
-    table.cell(info, 0, 1, "State", text_color = color.white, bgcolor = color.new(color.black, 30))
-    table.cell(info, 1, 1, stateTxt, text_color = color.white, bgcolor = color.new(stateColor, 40))
-
-// ── Alerts ──────────────────────────────────────────────────────────────────
-alertcondition(buySignal,  "ADX+VWAP+EMA Buy",  "Fast EMA crossed above slow EMA with ADX confirming trend")
-alertcondition(sellSignal, "ADX+VWAP+EMA Sell", "Fast EMA crossed below slow EMA with ADX confirming trend")
+    f_fillCell(0, 0, atr, 'ATR: ')
+    f_fillCell(1, 0, x, 'H: ')
+    f_fillCell(2, 0, x2, 'L: ')
