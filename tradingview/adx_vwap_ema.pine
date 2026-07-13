@@ -37,8 +37,9 @@ fill(pZero, pTop, color = color.new(#000000, 45), title = "Trendy Level")
 //  VWAP  (force_overlay = true  → main chart)
 // ─────────────────────────────────────────────
 hideonDWM = input(false, title = "Hide VWAP on 1D or Above", group = "VWAP Settings", display = display.none)
-var anchor = input.string(defval = "Session", title = "Anchor Period",
- options = ["Session", "Week", "Month", "Quarter", "Year", "Decade", "Century", "Earnings", "Dividends", "Splits"], group = "VWAP Settings")
+var anchor = input.string(defval = "None (No Reset)", title = "Anchor Period",
+ options = ["None (No Reset)", "Session", "Week", "Month", "Quarter", "Year", "Decade", "Century", "Earnings", "Dividends", "Splits"], group = "VWAP Settings",
+ tooltip = "None (No Reset) = continuous VWAP that accumulates over all loaded bars and never restarts. Other options reset the calculation at the start of each period.")
 src    = input(title = "Source", defval = hlc3, group = "VWAP Settings", display = display.none)
 offset = input.int(0, title = "Offset",  group = "VWAP Settings", display = display.none)
 
@@ -57,6 +58,7 @@ if barstate.islast and cumVolume == 0
     runtime.error("No volume is provided by the data vendor.")
 
 isNewPeriod = switch anchor
+    "None (No Reset)" => false
     "Earnings"  =>
         new_earnings_actual       = request.earnings(syminfo.tickerid, earnings.actual,       barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol = true)
         new_earnings_standardized = request.earnings(syminfo.tickerid, earnings.standardized, barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol = true)
