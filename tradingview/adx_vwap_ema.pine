@@ -37,9 +37,14 @@ fill(pZero, pTop, color = color.new(#000000, 45), title = "Trendy Level")
 //  VWAP  (force_overlay = true  → main chart)
 // ─────────────────────────────────────────────
 hideonDWM = input(false, title = "Hide VWAP on 1D or Above", group = "VWAP Settings", display = display.none)
-var anchor = input.string(defval = "None (No Reset)", title = "Anchor Period",
- options = ["None (No Reset)", "Session", "Week", "Month", "Quarter", "Year", "Decade", "Century", "Earnings", "Dividends", "Splits"], group = "VWAP Settings",
- tooltip = "None (No Reset) = continuous VWAP that accumulates over all loaded bars and never restarts. Other options reset the calculation at the start of each period.")
+VWAP_MODE_ROLLING  = "Rolling (No Reset)"
+VWAP_MODE_ANCHORED = "Anchored (Resets Each Period)"
+vwapMode = input.string(defval = VWAP_MODE_ROLLING, title = "VWAP Mode",
+ options = [VWAP_MODE_ROLLING, VWAP_MODE_ANCHORED], group = "VWAP Settings",
+ tooltip = "Rolling: VWAP over the last Anchor Period of bars (e.g. the last week), sliding forward continuously — it NEVER resets. Anchored: classic VWAP that restarts at the beginning of each period. Rolling applies to time anchors only; None/Earnings/Dividends/Splits always use anchored logic.")
+var anchor = input.string(defval = "Week", title = "Anchor Period",
+ options = ["Session", "Week", "Month", "Quarter", "Year", "Decade", "Century", "None (No Reset)", "Earnings", "Dividends", "Splits"], group = "VWAP Settings",
+ tooltip = "In Rolling mode this is the length of the sliding window. In Anchored mode it is where the VWAP restarts. None (No Reset) = cumulative VWAP over all loaded bars.")
 src    = input(title = "Source", defval = hlc3, group = "VWAP Settings", display = display.none)
 offset = input.int(0, title = "Offset",  group = "VWAP Settings", display = display.none)
 
@@ -82,6 +87,31 @@ isEsdAnchor = anchor == "Earnings" or anchor == "Dividends" or anchor == "Splits
 if na(src[1]) and not isEsdAnchor
     isNewPeriod := true
 
+// ── Rolling (no-reset) VWAP ──────────────────────────────────────────────────
+// Window length in calendar days for each time anchor; na = rolling not applicable.
+float rollDays = switch anchor
+    "Session" => 1.0
+    "Week"    => 7.0
+    "Month"   => 30.0
+    "Quarter" => 91.0
+    "Year"    => 365.0
+    "Decade"  => 3650.0
+    "Century" => 36500.0
+    => na
+
+useRolling = vwapMode == VWAP_MODE_ROLLING and not na(rollDays)
+
+// Bars in the window, from calendar time / bar duration. Clamped to Pine's
+// history limit, so very long windows on very small timeframes get truncated.
+rollBars = int(math.max(1, math.min(4900, math.round(nz(rollDays, 7.0) * 86400.0 / timeframe.in_seconds()))))
+
+pvRoll     = src * volume
+sumVRoll   = math.sum(volume, rollBars)
+sumPVRoll  = math.sum(pvRoll, rollBars)
+sumPV2Roll = math.sum(src * pvRoll, rollBars)
+rollVwap   = sumPVRoll / sumVRoll
+rollStdev  = math.sqrt(math.max(sumPV2Roll / sumVRoll - rollVwap * rollVwap, 0))
+
 float vwapValue       = na
 float upperBandValue1 = na
 float lowerBandValue1 = na
@@ -92,15 +122,15 @@ float lowerBandValue3 = na
 
 if not (hideonDWM and timeframe.isdwm)
     [_vwap, _stdevUpper, _] = ta.vwap(src, isNewPeriod, 1)
-    vwapValue      := _vwap
-    stdevAbs        = _stdevUpper - _vwap
-    bandBasis       = calcModeInput == "Standard Deviation" ? stdevAbs : _vwap * 0.01
-    upperBandValue1 := _vwap + bandBasis * bandMult_1
-    lowerBandValue1 := _vwap - bandBasis * bandMult_1
-    upperBandValue2 := _vwap + bandBasis * bandMult_2
-    lowerBandValue2 := _vwap - bandBasis * bandMult_2
-    upperBandValue3 := _vwap + bandBasis * bandMult_3
-    lowerBandValue3 := _vwap - bandBasis * bandMult_3
+    vwapValue      := useRolling ? rollVwap : _vwap
+    stdevAbs        = useRolling ? rollStdev : _stdevUpper - _vwap
+    bandBasis       = calcModeInput == "Standard Deviation" ? stdevAbs : vwapValue * 0.01
+    upperBandValue1 := vwapValue + bandBasis * bandMult_1
+    lowerBandValue1 := vwapValue - bandBasis * bandMult_1
+    upperBandValue2 := vwapValue + bandBasis * bandMult_2
+    lowerBandValue2 := vwapValue - bandBasis * bandMult_2
+    upperBandValue3 := vwapValue + bandBasis * bandMult_3
+    lowerBandValue3 := vwapValue - bandBasis * bandMult_3
 
 plot(vwapValue, title = "VWAP", color = #2962FF, offset = offset, force_overlay = true)
 
