@@ -27,7 +27,8 @@ ADX     = ta.sma(DX, len)
 
 plotcandle(0, DIPlus,  0, DIPlus,  title = "DI+", color = color.new(color.green, 50), wickcolor = color.new(#ffffff, 100), bordercolor = color.new(#000000, 0), display = display.pane)
 plotcandle(0, DIMinus, 0, DIMinus, title = "DI-", color = color.new(color.red,   50), wickcolor = color.new(#ffffff, 100), bordercolor = color.new(#000000, 0), display = display.pane)
-plot(ADX, color = color.navy, title = "ADX")
+adxColor = DIPlus > DIMinus ? color.green : DIPlus < DIMinus ? color.red : color.black
+plot(ADX, color = adxColor, title = "ADX", linewidth = 2)
 hline(th, color = color.rgb(255, 248, 148),linewidth = 1,linestyle = hline.style_solid)
 pZero = plot(0,  color = color.new(color.gray, 100), display = display.none,title = "مستوى الصفر")
 pTop  = plot(th, color = color.new(color.gray, 100), display = display.none,title = "حدد الانطلاق")
