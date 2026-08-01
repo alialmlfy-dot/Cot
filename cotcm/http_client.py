@@ -1,6 +1,15 @@
 """HTTP with the ops-hardening rules from spec section 7:
-30s timeout, 3 retries with exponential backoff, then a loud failure
-(exception propagates into the heartbeat wrapper)."""
+30s timeout, retries with exponential backoff, then a loud failure
+(exception propagates into the heartbeat wrapper).
+
+Retry policy:
+  - 429 (throttled) and 5xx are retried with backoff — Socrata rate-limits
+    unauthenticated traffic, and one throttled page must not kill the
+    weekly run.
+  - Other 4xx are client errors: retrying cannot help, so fail loudly and
+    immediately with a response-body excerpt instead of letting a confusing
+    JSON decode error surface downstream.
+"""
 
 import time
 
@@ -16,13 +25,18 @@ def get(url, params=None, headers=None, timeout_s=30, retries=3, backoff_base_s=
     for attempt in range(retries + 1):
         try:
             resp = requests.get(url, params=params, headers=headers, timeout=timeout_s)
-            if resp.status_code >= 500:
-                raise HttpError("HTTP %d from %s" % (resp.status_code, url))
-            return resp
-        except (requests.RequestException, HttpError) as e:
+        except requests.RequestException as e:
             last_err = e
-            if attempt < retries:
-                time.sleep(backoff_base_s * (2 ** attempt))
+        else:
+            if resp.status_code == 429 or resp.status_code >= 500:
+                last_err = HttpError("HTTP %d from %s" % (resp.status_code, url))
+            elif resp.status_code >= 400:
+                raise HttpError("HTTP %d from %s: %s"
+                                % (resp.status_code, url, resp.text[:200]))
+            else:
+                return resp
+        if attempt < retries:
+            time.sleep(backoff_base_s * (2 ** attempt))
     raise HttpError("GET %s failed after %d attempts: %s" % (url, retries + 1, last_err))
 
 

@@ -1,5 +1,5 @@
 """SQLite schema (cot_cm.db). Idempotent init; idempotent writes everywhere
-(INSERT OR IGNORE on natural keys).
+(upserts on natural keys).
 
 Release-lag discipline is structural: cot_raw carries BOTH report_date
 (Tuesday snapshot) and release_date (Friday publication). Signal logic and
@@ -92,6 +92,7 @@ CREATE TABLE IF NOT EXISTS scores (
   crowding_flag INTEGER,         -- conc_pctile > measured extreme
   divergence_aligned INTEGER,    -- MM extreme + Commercial extreme agree contrarian
   components_json TEXT,
+  computed_at TEXT,              -- when this score row was (re)computed
   PRIMARY KEY (cftc_code, release_date)
 );
 
@@ -113,9 +114,21 @@ def connect(db_path):
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA foreign_keys=ON")
+    # Wait up to 10s on a locked database instead of failing instantly —
+    # the Saturday ingest and the Sunday staleness guard may overlap.
+    conn.execute("PRAGMA busy_timeout=10000")
     return conn
+
+
+def _migrate(conn):
+    """Additive migrations for existing databases (init stays idempotent)."""
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(scores)")}
+    if cols and "computed_at" not in cols:
+        conn.execute("ALTER TABLE scores ADD COLUMN computed_at TEXT")
+        conn.commit()
 
 
 def init_db(conn):
     conn.executescript(SCHEMA)
     conn.commit()
+    _migrate(conn)

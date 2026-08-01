@@ -1,11 +1,17 @@
 """Config loading. The universe and all sources are config-driven (v1.1 rule:
-re-expanding the universe must be a config change, not a rewrite)."""
+re-expanding the universe must be a config change, not a rewrite).
+
+Secrets: the Socrata app token can be supplied via the
+COTCM_SOCRATA_APP_TOKEN environment variable, which overrides (and keeps out
+of version control) the config file's socrata.app_token value."""
 
 import json
 import os
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_CONFIG_PATH = os.path.join(REPO_ROOT, "config.json")
+
+ENV_SOCRATA_TOKEN = "COTCM_SOCRATA_APP_TOKEN"
 
 
 def load_config(path=None):
@@ -19,6 +25,10 @@ def load_config(path=None):
         cfg["db_path"] = os.path.join(REPO_ROOT, cfg["db_path"])
     if not os.path.isabs(cfg["reports_dir"]):
         cfg["reports_dir"] = os.path.join(REPO_ROOT, cfg["reports_dir"])
+    # Env var wins over the file so the token never has to live in git.
+    token = os.environ.get(ENV_SOCRATA_TOKEN)
+    if token:
+        cfg.setdefault("socrata", {})["app_token"] = token
     return cfg
 
 
