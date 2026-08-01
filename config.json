@@ -22,6 +22,10 @@
     "retries": 3,
     "backoff_base_s": 2
   },
+  "ingest": {
+    "trailing_redownload_days": 35,
+    "_note": "Weekly incremental re-pulls this many days behind the newest held report_date and upserts, so delayed holiday-week reports and CFTC revisions propagate. 35 days spans the longest holiday publication gaps."
+  },
   "release_lag": {
     "min_days": 3,
     "release_weekday": 4
