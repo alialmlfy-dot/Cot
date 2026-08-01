@@ -1,5 +1,5 @@
 """CFTC Disaggregated Futures-Only ingest — backfill (2006->present) and
-incremental (latest report date only).
+incremental (trailing-window re-pull around the latest held report date).
 
 Backfill strategy (documented per spec section 2): paginated Socrata pulls
 filtered to the approved contract codes, ordered by report_date. The universe
@@ -7,12 +7,19 @@ is only ~6 contracts x ~1,040 weeks (~6k rows), so a handful of 50k-row pages
 covers full history — annual CFTC archive files are unnecessary and would add
 a second parser to maintain.
 
+Incremental strategy: re-pull a trailing window (config
+ingest.trailing_redownload_days, default 35) behind the newest held
+report_date, not just strictly-newer dates. CFTC occasionally publishes a
+delayed report (holiday weeks) AFTER a newer one is already out, and also
+revises published rows; a strictly-greater filter plus INSERT OR IGNORE would
+silently drop both. Writes upsert on the (cftc_code, report_date) natural
+key, so corrections and late arrivals propagate.
+
 Release-lag discipline (operating rule 3): every row stores both report_date
-and the computed release_date. Idempotent writes via INSERT OR IGNORE on the
-(cftc_code, report_date) natural key (operating rule 4).
+and the computed release_date (operating rule 4: idempotent writes).
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from . import discovery, integrity
 from .http_client import get_cfg
@@ -31,6 +38,8 @@ _VALUE_CONCEPTS = [
 ]
 
 PAGE_SIZE = 50000
+
+DEFAULT_TRAILING_REDOWNLOAD_DAYS = 35
 
 
 def _utcnow():
@@ -92,8 +101,13 @@ def _fetch(cfg, domain, dataset_id, fields, codes, where_extra=None, order="ASC"
     return rows
 
 
-_INSERT = (
-    "INSERT OR IGNORE INTO cot_raw (cftc_code, report_date, release_date, "
+_UPDATE_COLS = ", ".join(
+    "%s=excluded.%s" % (c, c)
+    for c in ["release_date", "release_date_estimated"] + _VALUE_CONCEPTS
+    + ["ingested_at"])
+
+_UPSERT = (
+    "INSERT INTO cot_raw (cftc_code, report_date, release_date, "
     "release_date_estimated, open_interest, prod_merc_long, prod_merc_short, "
     "swap_long, swap_short, swap_spread, mm_long, mm_short, mm_spread, "
     "other_rept_long, other_rept_short, other_rept_spread, nonrept_long, "
@@ -106,18 +120,25 @@ _INSERT = (
     ":other_rept_spread, :nonrept_long, :nonrept_short, :conc_gross_4_long, "
     ":conc_gross_4_short, :conc_gross_8_long, :conc_gross_8_short, "
     ":conc_net_4_long, :conc_net_4_short, :conc_net_8_long, :conc_net_8_short, "
-    ":traders_total, :ingested_at)"
+    ":traders_total, :ingested_at) "
+    "ON CONFLICT(cftc_code, report_date) DO UPDATE SET " + _UPDATE_COLS
 )
 
 
 def _write(conn, rows):
+    """Upsert rows; returns (inserted, updated). Late-arriving older report
+    dates insert normally; revised rows overwrite in place — no duplicates."""
     ts = _utcnow()
     for r in rows:
         r["ingested_at"] = ts
-    before = conn.total_changes
-    conn.executemany(_INSERT, rows)
+    existing = {
+        (r["cftc_code"], r["report_date"])
+        for r in conn.execute("SELECT cftc_code, report_date FROM cot_raw")
+    }
+    inserted = sum(1 for r in rows if (r["cftc_code"], r["report_date"]) not in existing)
+    conn.executemany(_UPSERT, rows)
     conn.commit()
-    return conn.total_changes - before
+    return inserted, len(rows) - inserted
 
 
 def backfill(cfg, conn):
@@ -128,38 +149,52 @@ def backfill(cfg, conn):
     rows = _fetch(cfg, domain, dataset_id, fields, codes, order="ASC")
     integrity.assert_ok(rows, min_contracts=min(5, len(codes)),
                         expect_full_universe=True)
-    written = _write(conn, rows)
+    inserted, updated = _write(conn, rows)
     latest = max((r["report_date"] for r in rows), default=None)
-    return {"rows_written": written, "rows_seen": len(rows),
+    return {"rows_written": inserted + updated,
+            "rows_seen": len(rows),
             "latest_report_date": latest,
-            "message": "backfill: %d rows seen, %d new, %d contracts, latest %s"
-                       % (len(rows), written, len(codes), latest)}
+            "message": "backfill: %d rows seen, %d new, %d refreshed, %d "
+                       "contracts, latest %s"
+                       % (len(rows), inserted, updated, len(codes), latest)}
 
 
 def incremental(cfg, conn):
-    """Pull only the most recent report date and any newer than what we hold.
-    Integrity requires the full approved universe present in the new snapshot."""
+    """Re-pull the trailing window behind the newest held report_date and
+    upsert. Catches strictly-new reports, delayed holiday-week reports that
+    arrive after a newer date was already ingested, and CFTC revisions to
+    recently published rows. Integrity requires the full approved universe
+    present in every snapshot date of the window."""
     domain, dataset_id, fields = discovery.resolve_source(cfg)
     codes = _approved_codes(conn)
     row = conn.execute("SELECT max(report_date) FROM cot_raw").fetchone()
     have_latest = row[0] if row else None
     f_date = fields["report_date"]
-    where_extra = "%s > '%s'" % (f_date, have_latest) if have_latest else None
+    if have_latest:
+        trailing_days = cfg.get("ingest", {}).get(
+            "trailing_redownload_days", DEFAULT_TRAILING_REDOWNLOAD_DAYS)
+        floor = (parse_date(have_latest)
+                 - timedelta(days=trailing_days)).isoformat()
+        where_extra = "%s > '%s'" % (f_date, floor)
+    else:
+        where_extra = None
     rows = _fetch(cfg, domain, dataset_id, fields, codes,
                   where_extra=where_extra, order="ASC")
     if not rows:
         return {"rows_written": 0, "rows_seen": 0,
                 "latest_report_date": have_latest,
-                "message": "incremental: no new report date (latest still %s)"
-                           % have_latest}
-    # New snapshot must carry the full approved universe for each new date.
+                "message": "incremental: no rows in trailing window (latest "
+                           "still %s)" % have_latest}
+    # Every snapshot date in the window must carry the full approved universe.
     for rd in sorted({r["report_date"] for r in rows}):
         batch = [r for r in rows if r["report_date"] == rd]
         integrity.assert_ok(batch, min_contracts=len(codes),
                             expect_full_universe=True)
-    written = _write(conn, rows)
+    inserted, updated = _write(conn, rows)
     latest = max(r["report_date"] for r in rows)
-    return {"rows_written": written, "rows_seen": len(rows),
+    advanced = have_latest is None or latest > have_latest
+    return {"rows_written": inserted + updated, "rows_seen": len(rows),
             "latest_report_date": latest,
-            "message": "incremental: %d new rows through report_date %s"
-                       % (written, latest)}
+            "message": "incremental: %d new, %d refreshed through report_date "
+                       "%s%s" % (inserted, updated, latest,
+                                 "" if advanced else " (no new report date)")}

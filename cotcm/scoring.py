@@ -121,6 +121,7 @@ def score_all(cfg, conn):
     transitions and the composite-distribution check). Idempotent
     INSERT OR REPLACE on (cftc_code, release_date)."""
     sig = cfg["signal"]
+    ts = _utcnow()
     contracts = conn.execute(
         "SELECT cftc_code, root FROM contract_map WHERE approved=1 AND enabled=1"
     ).fetchall()
@@ -135,12 +136,15 @@ def score_all(cfg, conn):
         for ft in feats:
             s = score_row(ft, root, sig)
             if s:
+                s["computed_at"] = ts
                 rows.append(s)
         conn.executemany(
             "INSERT OR REPLACE INTO scores (cftc_code, release_date, composite, "
-            "state, crowding_flag, divergence_aligned, components_json) "
+            "state, crowding_flag, divergence_aligned, components_json, "
+            "computed_at) "
             "VALUES (:cftc_code, :release_date, :composite, :state, "
-            ":crowding_flag, :divergence_aligned, :components_json)", rows)
+            ":crowding_flag, :divergence_aligned, :components_json, "
+            ":computed_at)", rows)
         conn.commit()
         total += len(rows)
     return {"rows_written": total,
