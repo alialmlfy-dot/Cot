@@ -8,6 +8,10 @@ Rules honoured:
     a feature emits NULL until its full window exists (spec section 4 preamble).
   - Idempotent writes: INSERT OR REPLACE on (cftc_code, release_date) so a
     recompute overwrites cleanly rather than duplicating.
+  - NULL open-interest rows (should not survive the ingest integrity gate,
+    but history is long) skip the dependent OI feature rather than crashing
+    the whole contract's recompute — the same NULL-tolerance hp_raw already
+    had.
 
 Window / burn-in choices (documented so the measurement report can cite them):
   hp_index          52-week SMA                      -> from obs 52
@@ -73,10 +77,13 @@ def compute_contract(conn, cftc_code):
     # Concentration: the more crowded of the two net-4 legs (squeeze context).
     conc4 = [max(r["conc_net_4_long"] or 0, r["conc_net_4_short"] or 0) for r in rows]
 
-    # WoW deltas (index i defined for i>=1)
+    # WoW deltas (index i defined for i>=1; None where an OI leg is missing)
     d_comm = [None] + [comm_net[i] - comm_net[i - 1] for i in range(1, n)]
     d_mm = [None] + [mm_net[i] - mm_net[i - 1] for i in range(1, n)]
-    d_oi = [None] + [oi[i] - oi[i - 1] for i in range(1, n)]
+    d_oi = [None] + [
+        (oi[i] - oi[i - 1]) if (oi[i] is not None and oi[i - 1] is not None) else None
+        for i in range(1, n)
+    ]
 
     out = []
     for t in range(n):
@@ -109,10 +116,12 @@ def compute_contract(conn, cftc_code):
             if sd_comm:
                 f["z_delta_comm"] = (d_comm[t] - stats.mean(win_comm)) / sd_comm
 
-        # 4.4 OI confirmation flag
-        if t >= W_OIMED:  # 26 |dOI| values ending at t
-            med = stats.median([abs(x) for x in d_oi[t - W_OIMED + 1: t + 1]])
-            f["oi_flag"] = _oi_flag(d_oi[t], d_mm[t], med)
+        # 4.4 OI confirmation flag (skipped when the OI delta is unavailable)
+        if t >= W_OIMED and d_oi[t] is not None:
+            win = [abs(x) for x in d_oi[t - W_OIMED + 1: t + 1] if x is not None]
+            if win:
+                med = stats.median(win)
+                f["oi_flag"] = _oi_flag(d_oi[t], d_mm[t], med)
 
         # 4.5 concentration percentile (causal, expanding, 52wk burn-in)
         if t >= CONC_BURNIN - 1:

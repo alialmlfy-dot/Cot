@@ -4,11 +4,15 @@ source; stooq and operator-supplied files remain as configured fallbacks.
 Yahoo weekly bars are labeled by week-start; each bar's close is the week's
 final trade. We store it against that week's Friday (friday_of_week) so price
 weeks align with COT release_date Fridays. Idempotent on (cftc_code,
-week_end_date)."""
+week_end_date).
+
+Timestamps are interpreted in UTC explicitly — never the host's local
+timezone (the Pi runs Asia/Riyadh; a local-time conversion could shift a
+bar's calendar date near midnight boundaries)."""
 
 import csv
 import io
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 
 from .http_client import get_cfg
 from .release_date import friday_of_week
@@ -45,7 +49,8 @@ def _fetch_yahoo(cfg, source, symbol):
     for t, c in zip(ts, closes):
         if c is None:
             continue
-        wk = friday_of_week(date.fromtimestamp(t))
+        bar_date = datetime.fromtimestamp(t, timezone.utc).date()
+        wk = friday_of_week(bar_date)
         out.append((wk.isoformat(), float(c)))
     return out
 
